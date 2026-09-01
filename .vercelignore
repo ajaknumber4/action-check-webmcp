@@ -1,0 +1,33 @@
+# Private/local planning state must never be uploaded with a deployment.
+.devpost-hackathon-state.json
+docs/archive/
+docs/hackathon/
+docs/research/
+webmcp_oauth_workbench_build_prompt.md
+nuACWEsO.md(1).part
+.claude/
+.codex/
+.agents/
+
+# Secrets and local environment files.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+.secrets/
+
+# Local outputs and browser artifacts.
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# The staging target is deployed independently with Wrangler.
+workers/

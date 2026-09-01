@@ -1,0 +1,23 @@
+{
+  "name": "@action-check/refund-staging-target",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run types:check && npm run type-check && npm test && npm run deploy:dry-run",
+    "deploy:dry-run": "wrangler deploy --dry-run --env=\"\" --outdir .wrangler/dry-run",
+    "deploy:dry-run:production": "wrangler deploy --dry-run --env production --outdir .wrangler/dry-run-production",
+    "deploy:production": "wrangler deploy --env production",
+    "dev": "wrangler dev --port 8787",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "types": "wrangler types ./worker-configuration.d.ts",
+    "types:check": "wrangler types ./worker-configuration.d.ts --check"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.2",
+    "typescript": "^5.9.2",
+    "vitest": "4.1.0",
+    "wrangler": "4.127.1"
+  }
+}

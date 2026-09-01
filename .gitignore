@@ -1,0 +1,30 @@
+# Local-only hackathon state and private strategic handoff material.
+.devpost-hackathon-state.json
+docs/archive/
+docs/hackathon/
+docs/research/
+webmcp_oauth_workbench_build_prompt.md
+nuACWEsO.md(1).part
+
+# Secrets and local environment files must never enter the public project.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+.secrets/
+
+# Generated dependencies, build output, coverage, and local browser artifacts.
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.tsbuildinfo
+.DS_Store
+.gstack/
+.vercel/
+.vercel
