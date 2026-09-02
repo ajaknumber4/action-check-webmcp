@@ -80,7 +80,7 @@ Release evidence must cover the path a judge will actually use:
 15. The always-visible Agent tools strip shows the exact three names and a truthful registration state; supporting fixtures are explicitly UI-only.
 16. The four supporting fixtures still verify booking drift, duplicate refunds, cloud false success, and social-publish false success.
 17. Each supporting negative control proves that the relevant test fails when its protection is removed, then recovers through **Run safe version**.
-18. Social Neuron remains an optional disabled integration unless exact isolated-staging attestation succeeds.
+18. External Target remains an optional disabled integration unless exact isolated-staging attestation succeeds.
 
 ## Evidence status
 
@@ -98,8 +98,8 @@ Release evidence must cover the path a judge will actually use:
 | Interactive agent discovery in the named judging client | Passed in the ChatGPT desktop in-app browser on 2026-09-01; three tools discovered and invoked end to end |
 | Manual browser review | Deployed journey passed reset, visible approval, four invokes, and proof with observed `2` versus `1`; zero console/page warnings/errors; three final captures recorded |
 | Four supporting synthetic fixtures | Passed in unit/DOM/browser regression, including negative-control recovery paths |
-| Social Neuron adapter tests using local fakes | Existing local coverage does not establish a deployed integration |
-| Live Social Neuron staging canary | Not run; required endpoints, isolated database, worker wiring, and independent sink are not deployed or configured |
+| External Target adapter tests using local fakes | Existing local coverage does not establish a deployed integration |
+| Live External Target staging canary | Not run; required endpoints, isolated database, worker wiring, and independent sink are not deployed or configured |
 | Public refund staging target | Deployed on public HTTPS with bounded synthetic-only capabilities |
 | Production target configuration | Passed: frontend build points to the exact Worker HTTPS origin; Worker allows only the stable frontend origin |
 | Public-boundary scan | Passed; final live captures are fictional-data-only and contain no populated EXIF/IPTC/XMP metadata |
@@ -167,7 +167,7 @@ The browser test must exercise the runtime's native discovery and invocation API
 - cleanup on trial replacement and session close;
 - tool disposal and page teardown;
 - forged or incomplete proof inputs;
-- optional Social Neuron registration before attestation.
+- optional External Target registration before attestation.
 
 Verifier sensitivity must be demonstrated by mutating or bypassing the real guard and confirming that the relevant test fails, then reverting the mutation before the release regression.
 

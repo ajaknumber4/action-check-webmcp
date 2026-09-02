@@ -15,7 +15,7 @@ import { useRefundComparisonView } from "../src/adapters/react/use-refund-compar
 import { App } from "../src/app/App";
 import {
   WorkbenchPage,
-  type SocialNeuronCanaryDisplay,
+  type ExternalTargetCanaryDisplay,
 } from "../src/app/WorkbenchPage";
 import {
   createRefundComparisonSession,
@@ -37,7 +37,7 @@ function EffectRunnerHarness({
   onRunCanary = async () => {},
 }: {
   caseId?: string;
-  canary?: SocialNeuronCanaryDisplay;
+  canary?: ExternalTargetCanaryDisplay;
   onRunCanary?: () => Promise<void>;
 }) {
   const [session] = useState(() =>
@@ -59,8 +59,8 @@ function EffectRunnerHarness({
       view={view}
       refundComparison={refundComparisonView}
       registration={{ state: "ready", label: "Agent tools ready" }}
-      socialNeuronCanary={canary}
-      onRunSocialNeuronCanary={onRunCanary}
+      externalTargetCanary={canary}
+      onRunExternalTargetCanary={onRunCanary}
       onApproveRefundComparison={(expected: RefundTrialRef) =>
         refundComparison.human.approve(expected).then(() => undefined)
       }
@@ -113,7 +113,7 @@ describe("Action Check effect runner", () => {
       suite.getByText(/page controls, not registered agent tools/i),
     ).toBeVisible();
     expect(
-      screen.queryByText(/Social Neuron is one reference case/i),
+      screen.queryByText(/External Target is one reference case/i),
     ).not.toBeInTheDocument();
     expect(screen.getByText("AC", { exact: true })).toHaveAttribute(
       "aria-hidden",
@@ -308,13 +308,13 @@ describe("Action Check effect runner", () => {
     expect(suite.queryByRole("img", { name: "running" })).not.toBeInTheDocument();
   });
 
-  it("labels disconnected Social Neuron staging as an optional disabled integration", () => {
+  it("labels disconnected External Target staging as an optional disabled integration", () => {
     render(<EffectRunnerHarness caseId={SOCIAL_PUBLISH_CASE_ID} />);
 
     const staging = screen.getByRole("region", {
-      name: "Social Neuron staging check",
+      name: "External Target staging check",
     });
-    expect(within(staging).getByText("OPTIONAL STAGING · DISABLED")).toBeVisible();
+    expect(within(staging).getByText("Optional external-target staging · disabled")).toBeVisible();
     expect(within(staging).getByText("Optional staging integration")).toBeVisible();
     expect(
       within(staging).getByText(
@@ -345,7 +345,7 @@ describe("Action Check effect runner", () => {
     );
 
     const staging = screen.getByRole("region", {
-      name: "Social Neuron staging check",
+      name: "External Target staging check",
     });
     expect(within(staging).getByText("Real workflow ready")).toBeVisible();
     await user.click(
@@ -354,7 +354,7 @@ describe("Action Check effect runner", () => {
     expect(onRunCanary).toHaveBeenCalledTimes(1);
   });
 
-  it("states that a running Social Neuron check stays in isolated staging", () => {
+  it("states that a running External Target check stays in isolated staging", () => {
     render(
       <EffectRunnerHarness
         caseId={SOCIAL_PUBLISH_CASE_ID}
@@ -363,10 +363,10 @@ describe("Action Check effect runner", () => {
     );
 
     const stagingElement = screen.getByRole("region", {
-      name: "Social Neuron staging check",
+      name: "External Target staging check",
     });
     const staging = within(stagingElement);
-    expect(staging.getByText("Checking Social Neuron…")).toBeVisible();
+    expect(staging.getByText("Checking External Target…")).toBeVisible();
     expect(staging.getByText(/isolated staging/i)).toBeVisible();
     expect(staging.getByText(/no social network is contacted/i)).toBeVisible();
     expect(stagingElement).toHaveClass("canary-panel-running");

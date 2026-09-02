@@ -11,7 +11,7 @@ The first viewport must answer four questions:
 - **Where is WebMCP?** The agent must call Action Check's registered fixture tools; the page reports their native registration state.
 - **What proves the result?** A fresh read from a separately served synthetic staging ledger, not the target invocation's claim.
 
-The default demo uses an external staging sandbox, but every effect remains fictional. It must never imply a payment account, Social Neuron staging service, payment processor, or production system is connected. The staging target is implemented and locally verified but is not publicly deployed.
+The default demo uses an external staging sandbox, but every effect remains fictional. It must never imply a payment account, External Target staging service, payment processor, or production system is connected. The staging target is implemented and locally verified but is not publicly deployed.
 
 The `issue_refund` tool is registered by Action Check and backed by Action Check's Worker. Copy must not imply that the page discovered or tested another team's independently registered WebMCP tool.
 
@@ -144,7 +144,7 @@ Behavioral requirements:
 - Replacing a trial or closing the session calls cleanup for both opaque run capabilities; short leases are the expiry backstop.
 - Cancellation and page teardown fail closed.
 
-The optional `run_social_neuron_canary` tool may appear only after the same-origin probe validates the exact isolated staging deployment. It exposes no target, account, content, provider, environment, credential, or URL selection.
+The optional `run_external_target_canary` tool may appear only after the same-origin probe validates the exact isolated staging deployment. It exposes no target, account, content, provider, environment, credential, or URL selection.
 
 ## Supporting synthetic suite
 
@@ -157,7 +157,7 @@ The suite contains four cross-industry examples:
 | Cloud | `Deploy said done, state unchanged` | `deploy_service` | An unhealthy service must reject the success claim |
 | Social | `Post said live, stayed draft` | `publish_post` | Draft state must reject the success claim |
 
-Keep the judge-facing disclosure that these supporting fixtures use page controls and are not registered agent tools. Do not show internal scope-defence copy about Social Neuron.
+Keep the judge-facing disclosure that these supporting fixtures use page controls and are not registered agent tools. Do not show internal scope-defence copy about External Target.
 
 These fixtures are UI-run supporting examples, not additional default WebMCP registrations.
 
@@ -190,11 +190,11 @@ Always separate:
 
 A success-shaped response cannot pass without the final state read. For false-success cases, say `Unchanged — false success caught`; do not present the unchanged business goal as a successful external action.
 
-## Social Neuron strip
+## External Target strip
 
 Show the strip only on the social fixture.
 
-- Default: `Optional staging integration` / `OPTIONAL STAGING · DISABLED`; no run button. Explain that the lower case remains a UI-only synthetic fixture.
+- Default: `Optional staging integration` / `Optional external-target staging · disabled`; no run button. Explain that the lower case remains a UI-only synthetic fixture.
 - Ready: show `Run staging check` only after exact attestation succeeds.
 - Running: explain that the check uses isolated staging and no social network.
 - Passed: show false claim rejected and truthful control accepted.
@@ -212,7 +212,7 @@ The synthetic suite must never trigger this canary.
 - `VerificationRulePanel`: plain three-row summary with technical checks collapsed.
 - `FaultPanel`: injected condition, target action, pass rule, and run controls.
 - `ReportPanel`: verdict, observed outcome, sensitivity result, metrics, and event trace.
-- `SocialNeuronCanaryPanel`: disconnected, ready, running, or proven staging state.
+- `ExternalTargetCanaryPanel`: disconnected, ready, running, or proven staging state.
 - `TechnicalDetails`: supporting-fixture IDs, evidence source, execution path, and report download. Native registration state belongs in the always-visible refund hero.
 
 ## Layout and visual system
@@ -267,6 +267,6 @@ Tokens:
 - Do not claim general exactly-once execution.
 - Do not imply that WebMCP supplies authorization, durable execution, idempotency, or postcondition verification automatically.
 - State that the external target is implemented and locally verified but not publicly deployed. A production build requires `VITE_REFUND_STAGING_TARGET_URL` pointing to its exact HTTPS origin.
-- Describe the Social Neuron adapter as implemented but disconnected.
-- Do not claim a live Social Neuron run until the upstream service, isolated database, worker, independent sink, and go-live evidence exist.
+- Describe the External Target adapter as implemented but disconnected.
+- Do not claim a live External Target run until the upstream service, isolated database, worker, independent sink, and go-live evidence exist.
 - Do not use historical OAuth or pre-refund-hero screenshots in the final submission.

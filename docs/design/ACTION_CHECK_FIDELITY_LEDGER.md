@@ -5,7 +5,7 @@ Concept: generated design reference retained outside the public repository.
 | Comparison point | Concept | Implemented | Status |
 |---|---|---|---|
 | Product structure | Left test suite, contract and fault workspace, deterministic report | Refund proof is primary; the four-case suite remains a supporting rail and workspace | Intentionally strengthened |
-| Scenario breadth | Travel, payments, cloud, social | Same four industries; Social Neuron is explicitly one reference case | Matched |
+| Scenario breadth | Travel, payments, cloud, social | Same four industries; External Target is explicitly one reference case | Matched |
 | Test path | Define contract → Inject fault → Run tool → Verify effect | Define contract → Inject fault → Run tool → Check state | Intentional copy simplification |
 | Contract | Seven visible technical clauses | Plain `Before / Action / Pass only if` summary with all seven checks collapsed | Reduced visible complexity |
 | Result model | PASS, evidence metrics, event trace | Check result and observed outcome are separated; false success reads `Unchanged — false success caught` | Improved clarity |

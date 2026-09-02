@@ -16,7 +16,7 @@
     "playwright.native.config.ts",
     "scripts/**/*.mjs",
     "server/**/*.ts",
-    "src/integrations/social-neuron-staging/**/*.ts",
+    "src/integrations/external-target-staging/**/*.ts",
     "tests/**/*.server.test.ts"
   ]
 }

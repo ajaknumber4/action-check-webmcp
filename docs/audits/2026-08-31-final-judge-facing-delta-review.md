@@ -2,7 +2,7 @@
 
 Date: 2026-08-31
 
-Fixed point: HEAD `134357de3f98feb19f5b6020d16a52f572b11142` plus the current uncommitted Action Check worktree. Scope: the Agent tools strip, Social Neuron disabled state, mobile hierarchy, proof label, agent prompt contract, supporting tests, and audit/submission documentation.
+Fixed point: HEAD `134357de3f98feb19f5b6020d16a52f572b11142` plus the current uncommitted Action Check worktree. Scope: the Agent tools strip, External Target disabled state, mobile hierarchy, proof label, agent prompt contract, supporting tests, and audit/submission documentation.
 
 ## Standards
 

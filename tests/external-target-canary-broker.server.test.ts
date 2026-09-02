@@ -3,14 +3,14 @@ import type { AddressInfo } from "node:net";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { createSocialNeuronCanaryMiddleware } from "../server/social-neuron-staging/broker";
+import { createExternalTargetCanaryMiddleware } from "../server/external-target-staging/broker";
 
 type RunningServer = Readonly<{
   origin: string;
   close(): Promise<void>;
 }>;
 
-describe("Social Neuron staging broker", () => {
+describe("External Target staging broker", () => {
   let upstream: RunningServer;
   let broker: RunningServer;
   let upstreamRequests = 0;
@@ -65,7 +65,7 @@ describe("Social Neuron staging broker", () => {
   it("attests readiness and collapses repeat requests onto one staging run", async () => {
     broker = await startBroker(configuredEnvironment(upstream.origin));
 
-    const statusResponse = await fetch(`${broker.origin}/api/social-neuron-canary`, {
+    const statusResponse = await fetch(`${broker.origin}/api/external-target-canary`, {
       headers: { origin: broker.origin, "sec-fetch-site": "same-origin" },
     });
     const status = await statusResponse.json();
@@ -139,7 +139,7 @@ describe("Social Neuron staging broker", () => {
       onRequest(request) {
         if (
           request.method === "POST" &&
-          request.url === "/api/social-neuron-canary"
+          request.url === "/api/external-target-canary"
         ) {
           brokerPostArrivals += 1;
           if (brokerPostArrivals === 2) followerArrived();
@@ -238,7 +238,7 @@ describe("Social Neuron staging broker", () => {
       onRequest(request) {
         if (
           request.method === "POST" &&
-          request.url === "/api/social-neuron-canary"
+          request.url === "/api/external-target-canary"
         ) {
           brokerPostArrivals += 1;
           if (brokerPostArrivals === 2) followerArrived();
@@ -305,7 +305,7 @@ describe("Social Neuron staging broker", () => {
   it("rejects caller-supplied environment and URL fields before contacting staging", async () => {
     broker = await startBroker(configuredEnvironment(upstream.origin));
 
-    const response = await fetch(`${broker.origin}/api/social-neuron-canary`, {
+    const response = await fetch(`${broker.origin}/api/external-target-canary`, {
       method: "POST",
       headers: brokerHeaders(broker.origin),
       body: JSON.stringify({
@@ -328,7 +328,7 @@ describe("Social Neuron staging broker", () => {
   it("rejects cross-origin mutation requests before contacting staging", async () => {
     broker = await startBroker(configuredEnvironment(upstream.origin));
 
-    const response = await fetch(`${broker.origin}/api/social-neuron-canary`, {
+    const response = await fetch(`${broker.origin}/api/external-target-canary`, {
       method: "POST",
       headers: brokerHeaders("https://attacker.example"),
       body: JSON.stringify({ requestId: "request-cross-origin-01" }),
@@ -341,10 +341,10 @@ describe("Social Neuron staging broker", () => {
 
 function configuredEnvironment(upstreamOrigin: string): NodeJS.ProcessEnv {
   return {
-    SOCIAL_NEURON_STAGING_CANARY_URL: upstreamOrigin,
-    SOCIAL_NEURON_STAGING_CANARY_TOKEN: "server-only-test-token",
-    SOCIAL_NEURON_STAGING_DEPLOYMENT_ID: "deploy-broker-test",
-    SOCIAL_NEURON_STAGING_COMMIT_SHA: "abcdef123456",
+    EXTERNAL_TARGET_STAGING_CANARY_URL: upstreamOrigin,
+    EXTERNAL_TARGET_STAGING_CANARY_TOKEN: "server-only-test-token",
+    EXTERNAL_TARGET_STAGING_DEPLOYMENT_ID: "deploy-broker-test",
+    EXTERNAL_TARGET_STAGING_COMMIT_SHA: "abcdef123456",
   };
 }
 
@@ -354,7 +354,7 @@ async function startBroker(
     onRequest?: (request: IncomingMessage) => void;
   }> = {},
 ): Promise<RunningServer> {
-  const middleware = createSocialNeuronCanaryMiddleware({ environment });
+  const middleware = createExternalTargetCanaryMiddleware({ environment });
   return await startServer(async (request, response) => {
     options.onRequest?.(request);
     await middleware(request, response, () => {
@@ -388,7 +388,7 @@ async function runBroker(
   requestId: string,
   options: Readonly<{ signal?: AbortSignal }> = {},
 ): Promise<Response> {
-  return await fetch(`${origin}/api/social-neuron-canary`, {
+  return await fetch(`${origin}/api/external-target-canary`, {
     method: "POST",
     headers: brokerHeaders(origin),
     body: JSON.stringify({ requestId }),
@@ -413,7 +413,7 @@ async function handleUpstream(
   const body = await readBody(request);
   if (request.method === "GET" && request.url === "/internal/action-check/identity") {
     return json(response, 200, {
-      service: "social-neuron",
+      service: "external-target",
       environment: "staging",
       deploymentId: "deploy-broker-test",
       commitSha: "abcdef123456",
@@ -479,7 +479,7 @@ async function handleUpstream(
         ? { status: "published", deliveryCount: 1, receiptPresent: true }
         : { status: "draft", deliveryCount: 0, receiptPresent: false },
       evidence: {
-        source: "social-neuron-staging",
+        source: "external-target-staging",
         attestationDigest: "sha256:attestation",
         observedAt: after ? "2026-08-30T10:00:01.000Z" : "2026-08-30T10:00:00.000Z",
         digest: `sha256:${runId}:${after ? "after" : "before"}`,

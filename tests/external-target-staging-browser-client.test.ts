@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { BrowserSocialNeuronCanaryClient } from "../src/integrations/social-neuron-staging/browser-client";
+import { BrowserExternalTargetCanaryClient } from "../src/integrations/external-target-staging/browser-client";
 
 const passedReport = {
   status: "passed",
@@ -29,9 +29,9 @@ const passedReport = {
   cleanup: "completed",
 } as const;
 
-describe("browser Social Neuron canary client", () => {
+describe("browser External Target canary client", () => {
   it("reports the default unconfigured broker as blocked", async () => {
-    const client = new BrowserSocialNeuronCanaryClient({
+    const client = new BrowserExternalTargetCanaryClient({
       fetch: async () => jsonResponse(503, {
         status: "blocked",
         reason: "STAGING_NOT_CONFIGURED",
@@ -48,7 +48,7 @@ describe("browser Social Neuron canary client", () => {
 
   it("uses one fixed same-origin request with no caller-controlled target", async () => {
     const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
-    const client = new BrowserSocialNeuronCanaryClient({
+    const client = new BrowserExternalTargetCanaryClient({
       createRequestId: () => "request-browser-01",
       fetch: async (input, init) => {
         calls.push({ input, init });
@@ -61,7 +61,7 @@ describe("browser Social Neuron canary client", () => {
       verdict: "false_success_caught",
     });
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.input).toBe("/api/social-neuron-canary");
+    expect(calls[0]?.input).toBe("/api/external-target-canary");
     expect(calls[0]?.init).toMatchObject({
       method: "POST",
       credentials: "same-origin",
@@ -81,7 +81,7 @@ describe("browser Social Neuron canary client", () => {
       if (bodies.length === 1) throw new TypeError("connection closed");
       return jsonResponse(200, passedReport);
     });
-    const client = new BrowserSocialNeuronCanaryClient({
+    const client = new BrowserExternalTargetCanaryClient({
       createRequestId: () => "request-retry-01",
       fetch: fetchMock,
     });
@@ -99,7 +99,7 @@ describe("browser Social Neuron canary client", () => {
 
   it("forwards caller cancellation instead of converting it to a blocked result", async () => {
     const controller = new AbortController();
-    const client = new BrowserSocialNeuronCanaryClient({
+    const client = new BrowserExternalTargetCanaryClient({
       fetch: async (_input, init) =>
         await new Promise<Response>((_resolve, reject) => {
           init?.signal?.addEventListener(

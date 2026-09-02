@@ -1,7 +1,7 @@
 import type {
   BrowserCanaryReport,
-  BrowserSocialNeuronCanaryRunner,
-} from "../../integrations/social-neuron-staging/browser-client";
+  BrowserExternalTargetCanaryRunner,
+} from "../../integrations/external-target-staging/browser-client";
 import type {
   ModelContextRegistrar,
   WebMcpToolDefinition,
@@ -11,10 +11,10 @@ import {
   emptyToolInputSchema,
 } from "./tool-schemas";
 
-export const SOCIAL_NEURON_CANARY_TOOL_NAME = "run_social_neuron_canary";
-export const MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS = 1_500;
+export const EXTERNAL_TARGET_CANARY_TOOL_NAME = "run_external_target_canary";
+export const MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS = 1_500;
 
-export type SocialNeuronCanaryToolRegistration = Readonly<{
+export type ExternalTargetCanaryToolRegistration = Readonly<{
   ready: Promise<void>;
   dispose(): void;
 }>;
@@ -23,12 +23,12 @@ export type SocialNeuronCanaryToolRegistration = Readonly<{
  * Opt-in registration for the attested staging canary. The caller is
  * responsible for checking broker readiness before exposing this tool.
  */
-export function registerSocialNeuronCanaryTool(
-  runner: BrowserSocialNeuronCanaryRunner,
+export function registerExternalTargetCanaryTool(
+  runner: BrowserExternalTargetCanaryRunner,
   registrar: ModelContextRegistrar,
-): SocialNeuronCanaryToolRegistration {
+): ExternalTargetCanaryToolRegistration {
   const lifecycle = new AbortController();
-  const definition = createSocialNeuronCanaryToolDefinition(runner);
+  const definition = createExternalTargetCanaryToolDefinition(runner);
   const ready = registrar
     .registerTool(definition, { signal: lifecycle.signal })
     .catch((error: unknown) => {
@@ -42,7 +42,7 @@ export function registerSocialNeuronCanaryTool(
       if (lifecycle.signal.aborted) return;
       lifecycle.abort(
         new DOMException(
-          "The Social Neuron staging tool was disposed.",
+          "The External Target staging tool was disposed.",
           "AbortError",
         ),
       );
@@ -50,14 +50,14 @@ export function registerSocialNeuronCanaryTool(
   };
 }
 
-export function createSocialNeuronCanaryToolDefinition(
-  runner: BrowserSocialNeuronCanaryRunner,
+export function createExternalTargetCanaryToolDefinition(
+  runner: BrowserExternalTargetCanaryRunner,
 ): WebMcpToolDefinition {
   return {
-    name: SOCIAL_NEURON_CANARY_TOOL_NAME,
-    title: "Run Social Neuron staging check",
+    name: EXTERNAL_TARGET_CANARY_TOOL_NAME,
+    title: "Run External Target staging check",
     description:
-      "Run the fixed isolated Social Neuron staging publish canary. It cannot choose accounts, content, providers, credentials, or production targets.",
+      "Run the fixed isolated External Target staging publish canary. It cannot choose accounts, content, providers, credentials, or production targets.",
     inputSchema: emptyToolInputJsonSchema,
     annotations: {
       readOnlyHint: false,
@@ -89,7 +89,7 @@ function boundedReport(report: BrowserCanaryReport): BrowserCanaryReport {
   try {
     if (
       JSON.stringify(report).length <=
-      MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS
+      MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS
     ) {
       return report;
     }

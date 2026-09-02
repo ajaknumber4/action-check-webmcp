@@ -37,7 +37,7 @@ The official examples keep material changes visible: design edits are staged for
 | Human-agent control | **Partly aligned** | The WebMCP path blocks `replay_flow` until human approval. The visible one-click path stages and immediately confirms the patch inside one handler (`src/app/WorkbenchPage.tsx`). | The strongest official interaction pattern—agent stages, human inspects/approves, agent continues—is hidden. |
 | Actual tool under test | **Major gap** | `README.md` explicitly says synthetic action names are not registered browser tools; the six registered tools operate the runner. | The headline currently overstates what is exercised end to end. |
 | Native test | **Partial proof** | `tests/native/webmcp-native.spec.ts` proves registration and several invocations. It proves `replay_flow` is blocked without approval, then uses the ordinary UI to complete the run and calls only `prepare_report` through WebMCP afterward. | No successful consequential replay currently completes through the native WebMCP path. |
-| External integration | **Incomplete by design** | `run_social_neuron_canary` is exposed only after staging attestation, while the README truthfully says the upstream staging system is not deployed. | Safe and honest, but it cannot presently supply real-world outcome evidence. |
+| External integration | **Incomplete by design** | `run_external_target_canary` is exposed only after staging attestation, while the README truthfully says the upstream staging system is not deployed. | Safe and honest, but it cannot presently supply real-world outcome evidence. |
 
 ## Required corrections before presenting this as an effect tester for WebMCP tools
 
@@ -78,7 +78,7 @@ Lead with the gap the specification actually names: declared intent versus actua
 - Declarative form tooling is optional and still incomplete in the draft; this application legitimately needs imperative JavaScript tools. [Declarative API explainer](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md)
 - Cross-origin discovery is unnecessary and would weaken the safety story. The credible scope is a same-origin harness or explicitly attested staging adapter.
 - Full autonomy would conflict with the stated human-in-the-loop design. Preserve explicit approval for consequential replay.
-- A production Social Neuron connection is not required to prove API alignment. It is an impact/credibility enhancement and must remain truthfully labelled until deployed.
+- A production External Target connection is not required to prove API alignment. It is an impact/credibility enhancement and must remain truthfully labelled until deployed.
 
 ## Submission-level conclusion
 

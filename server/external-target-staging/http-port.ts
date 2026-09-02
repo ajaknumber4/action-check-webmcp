@@ -6,10 +6,10 @@ import type {
   CanaryTrial,
   PublishClaim,
   PublishObservation,
-  SocialNeuronStagingPort,
-} from "../../src/integrations/social-neuron-staging/interface.ts";
+  ExternalTargetStagingPort,
+} from "../../src/integrations/external-target-staging/interface.ts";
 
-const CONTRACT = "social-neuron-publish-canary-v1";
+const CONTRACT = "external-publish-canary-v1";
 const MAX_RESPONSE_BYTES = 32_000;
 const REQUEST_TIMEOUT_MS = 15_000;
 const RUN_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
@@ -17,7 +17,7 @@ const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{7,159}$/;
 
 const attestationSchema = z
   .object({
-    service: z.literal("social-neuron"),
+    service: z.literal("external-target"),
     environment: z.enum(["development", "staging", "production"]),
     deploymentId: z.string().min(1).max(160),
     commitSha: z.string().min(7).max(64),
@@ -75,7 +75,7 @@ const observationSchema = z
       .strict(),
     evidence: z
       .object({
-        source: z.literal("social-neuron-staging"),
+        source: z.literal("external-target-staging"),
         attestationDigest: z.string().min(1).max(240),
         observedAt: z.iso.datetime(),
         digest: z.string().min(1).max(240),
@@ -106,7 +106,7 @@ type PendingResponse = Readonly<{
   dispose(): void;
 }>;
 
-export class SocialNeuronStagingResponseError extends Error {
+export class ExternalTargetStagingResponseError extends Error {
   readonly code:
     | "INVALID_STAGING_URL"
     | "MISSING_STAGING_CREDENTIAL"
@@ -116,12 +116,12 @@ export class SocialNeuronStagingResponseError extends Error {
     | "MALFORMED_STAGING_RESPONSE";
 
   constructor(
-    code: SocialNeuronStagingResponseError["code"],
+    code: ExternalTargetStagingResponseError["code"],
     message: string,
     options?: ErrorOptions,
   ) {
     super(message, options);
-    this.name = "SocialNeuronStagingResponseError";
+    this.name = "ExternalTargetStagingResponseError";
     this.code = code;
   }
 }
@@ -130,7 +130,7 @@ export class SocialNeuronStagingResponseError extends Error {
  * Server-only adapter. Its credential provider must never be constructed from
  * VITE_* variables or sent to browser code.
  */
-export class HttpSocialNeuronStagingPort implements SocialNeuronStagingPort {
+export class HttpExternalTargetStagingPort implements ExternalTargetStagingPort {
   readonly #origin: URL;
   readonly #credential: () => Promise<string>;
   readonly #fetch: typeof fetch;
@@ -161,7 +161,7 @@ export class HttpSocialNeuronStagingPort implements SocialNeuronStagingPort {
   ): Promise<CanaryPreparation> {
     const parsedTrial = trialSchema.parse(trial);
     if (!REQUEST_ID.test(requestId)) {
-      throw new SocialNeuronStagingResponseError(
+      throw new ExternalTargetStagingResponseError(
         "MALFORMED_STAGING_RESPONSE",
         "The generated canary request identity was invalid.",
       );
@@ -196,7 +196,7 @@ export class HttpSocialNeuronStagingPort implements SocialNeuronStagingPort {
   ): Promise<PublishClaim> {
     const runId = checkedRunId(preparation.runId);
     if (!REQUEST_ID.test(requestId)) {
-      throw new SocialNeuronStagingResponseError(
+      throw new ExternalTargetStagingResponseError(
         "MALFORMED_STAGING_RESPONSE",
         "The generated canary request identity was invalid.",
       );
@@ -258,7 +258,7 @@ export class HttpSocialNeuronStagingPort implements SocialNeuronStagingPort {
   async #request(path: string, init: RequestInit): Promise<PendingResponse> {
     const credential = await this.#credential();
     if (!credential || credential.trim().length === 0 || credential.length > 4_096) {
-      throw new SocialNeuronStagingResponseError(
+      throw new ExternalTargetStagingResponseError(
         "MISSING_STAGING_CREDENTIAL",
         "The server-side staging credential is unavailable.",
       );
@@ -283,17 +283,17 @@ export class HttpSocialNeuronStagingPort implements SocialNeuronStagingPort {
     } catch (error: unknown) {
       timeout.dispose();
       if (error instanceof Error && error.name === "AbortError") throw error;
-      throw new SocialNeuronStagingResponseError(
+      throw new ExternalTargetStagingResponseError(
         "STAGING_TRANSPORT_FAILED",
-        "The Social Neuron staging service could not be reached.",
+        "The External Target staging service could not be reached.",
         { cause: error },
       );
     }
     if (!response.ok) {
       timeout.dispose();
-      throw new SocialNeuronStagingResponseError(
+      throw new ExternalTargetStagingResponseError(
         "STAGING_HTTP_ERROR",
-        "The Social Neuron staging service rejected the canary request.",
+        "The External Target staging service rejected the canary request.",
       );
     }
     return { response, dispose: timeout.dispose };
@@ -305,18 +305,18 @@ function parseOrigin(value: string): URL {
   try {
     url = new URL(value);
   } catch (error: unknown) {
-    throw new SocialNeuronStagingResponseError(
+    throw new ExternalTargetStagingResponseError(
       "INVALID_STAGING_URL",
-      "The Social Neuron staging URL is invalid.",
+      "The External Target staging URL is invalid.",
       { cause: error },
     );
   }
 
   const local = url.hostname === "127.0.0.1" || url.hostname === "localhost";
   if (url.protocol !== "https:" && !(local && url.protocol === "http:")) {
-    throw new SocialNeuronStagingResponseError(
+    throw new ExternalTargetStagingResponseError(
       "INVALID_STAGING_URL",
-      "The Social Neuron staging URL must use HTTPS.",
+      "The External Target staging URL must use HTTPS.",
     );
   }
   if (
@@ -326,9 +326,9 @@ function parseOrigin(value: string): URL {
     url.hash ||
     (url.pathname !== "/" && url.pathname !== "")
   ) {
-    throw new SocialNeuronStagingResponseError(
+    throw new ExternalTargetStagingResponseError(
       "INVALID_STAGING_URL",
-      "The Social Neuron staging URL must be an origin without credentials or paths.",
+      "The External Target staging URL must be an origin without credentials or paths.",
     );
   }
   url.pathname = "/";
@@ -337,7 +337,7 @@ function parseOrigin(value: string): URL {
 
 function checkedRunId(value: string): string {
   if (!RUN_ID.test(value)) {
-    throw new SocialNeuronStagingResponseError(
+    throw new ExternalTargetStagingResponseError(
       "MALFORMED_STAGING_RESPONSE",
       "The staging run identity was invalid.",
     );
@@ -345,10 +345,10 @@ function checkedRunId(value: string): string {
   return value;
 }
 
-function malformedResponse(): SocialNeuronStagingResponseError {
-  return new SocialNeuronStagingResponseError(
+function malformedResponse(): ExternalTargetStagingResponseError {
+  return new ExternalTargetStagingResponseError(
     "MALFORMED_STAGING_RESPONSE",
-    "The Social Neuron staging service returned incomplete evidence.",
+    "The External Target staging service returned incomplete evidence.",
   );
 }
 
@@ -379,10 +379,10 @@ async function readBoundedText(
   return text + decoder.decode();
 }
 
-function responseTooLarge(): SocialNeuronStagingResponseError {
-  return new SocialNeuronStagingResponseError(
+function responseTooLarge(): ExternalTargetStagingResponseError {
+  return new ExternalTargetStagingResponseError(
     "STAGING_RESPONSE_TOO_LARGE",
-    "The Social Neuron staging evidence exceeded the response limit.",
+    "The External Target staging evidence exceeded the response limit.",
   );
 }
 

@@ -1,13 +1,13 @@
 # Public/private boundary
 
-This repository is an independent hackathon implementation. It contains no Social Neuron private source, history, credentials, incident records, customer data, production traces, or production infrastructure. The optional Social Neuron integration targets a new, narrow staging-canary contract; no private implementation code or live evidence is copied into this repository.
+This repository is an independent hackathon implementation. It contains no External Target private source, history, credentials, incident records, customer data, production traces, or production infrastructure. The optional External Target integration targets a new, narrow staging-canary contract; no private implementation code or live evidence is copied into this repository.
 
 ## What may be public
 
 - Browser application source and styling
 - The three Action Check-owned top-level WebMCP fixture registrations: `stage_refund_comparison`, `issue_refund`, and `prove_refund_comparison`
 - The synthetic refund staging Worker, its fixed HTTP contract, Durable Object schema, exact-origin CORS, reset rate-limit binding, and local deployment configuration
-- One conditional `run_social_neuron_canary` registration after exact staging attestation
+- One conditional `run_external_target_canary` registration after exact staging attestation
 - The fixed synthetic refund trial and its broken and protected provider lanes
 - Leased per-run SQLite Durable Object records containing fictional effects with random UUID effect IDs and bounded SHA-256 evidence digests
 - Four supporting static fixtures for booking drift, duplicate refunds, cloud false success, and social-publish false success
@@ -21,7 +21,7 @@ This repository is an independent hackathon implementation. It contains no Socia
 ## What must never enter the repository
 
 - Source, history, packages, prompts, tickets, or documentation from any private project
-- Real provider configuration, payment state, retry infrastructure, publication logic, or private Social Neuron source
+- Real provider configuration, payment state, retry infrastructure, publication logic, or private External Target source
 - Real agent traces, support cases, incident evidence, analytics, or telemetry
 - Credentials, private keys, cookies, session identifiers, authorization artifacts, tokens, or raw secret material
 - Customer, employee, entrant-personal, or other personal information
@@ -63,11 +63,11 @@ All four lower-suite cases are authored synthetic examples:
 
 The UI runs these fixtures through a browser-local application session. They are not additional default WebMCP targets. They are evidence-informed hypotheses, not customer incidents, measured demand, or production failure statistics.
 
-## Social Neuron staging boundary
+## External Target staging boundary
 
-The optional server broker may call only a configured Social Neuron staging-canary origin. The browser supplies one request ID and cannot supply a URL, environment, account, provider, content, or credential. A run is permitted only after the service attests an isolated database, canary sink, exact deployment identity, production-lifecycle worker, absent live-provider credentials, and disabled provider egress.
+The optional server broker may call only a configured External Target staging-canary origin. The browser supplies one request ID and cannot supply a URL, environment, account, provider, content, or credential. A run is permitted only after the service attests an isolated database, canary sink, exact deployment identity, production-lifecycle worker, absent live-provider credentials, and disabled provider egress.
 
-The required upstream service is not deployed or configured in this repository. `run_social_neuron_canary` is therefore absent by default, the UI shows **Optional staging integration · disabled**, and no live staging result is claimed.
+The required upstream service is not deployed or configured in this repository. `run_external_target_canary` is therefore absent by default, the UI shows **Optional external-target staging · disabled**, and no live staging result is claimed.
 
 ## Human and agent authority
 
@@ -91,7 +91,7 @@ Before any public remote, deployment, video, or submission update:
 8. Verify the four supporting fixtures, bug-sensitivity checks, false-success wording, responsive behavior, accessibility, cancellation, and invoke-loss reconciliation.
 9. Test agent discovery and invocation in the exact judging client against the exact deployed Worker; do not infer this from registration or local fakes alone.
 10. Confirm `VITE_REFUND_STAGING_TARGET_URL`, Worker allowlisted origins, deployment identity, rate-limit namespace, and release headers match the submitted deployment.
-11. If the Social Neuron canary is enabled, complete its documented go-live gate and retain only redacted, non-sensitive deployment and result evidence.
+11. If the External Target canary is enabled, complete its documented go-live gate and retain only redacted, non-sensitive deployment and result evidence.
 12. Record the exact public repository, frontend and Worker deployment identifiers, video URL, release tag, and final test results.
 13. Obtain explicit release approval.
 

@@ -2,7 +2,7 @@
 
 ## Scope and assumptions
 
-Action Check registers its own three-tool WebMCP refund fixture and backs that fixture with a separately served synthetic staging Worker. The Worker is an external outcome plane for the demo, not another team's independently registered WebMCP tool and not a payment provider. It stores leased fictional effects in SQLite Durable Objects and is publicly deployed with an exact frontend-origin allowlist, 15-minute capabilities, reset rate limiting, and a two-invocation ceiling per run. Four lower-page effect tests remain browser-local fictional fixtures. An optional, blocked-by-default server broker can expose one fixed Social Neuron staging canary only after exact readiness attestation; its required service is not deployed or configured here.
+Action Check registers its own three-tool WebMCP refund fixture and backs that fixture with a separately served synthetic staging Worker. The Worker is an external outcome plane for the demo, not another team's independently registered WebMCP tool and not a payment provider. It stores leased fictional effects in SQLite Durable Objects and is publicly deployed with an exact frontend-origin allowlist, 15-minute capabilities, reset rate limiting, and a two-invocation ceiling per run. Four lower-page effect tests remain browser-local fictional fixtures. An optional, blocked-by-default server broker can expose one fixed External Target staging canary only after exact readiness attestation; its required service is not deployed or configured here.
 
 The security objectives are to keep approval human-controlled, bind every mutating call to the current approved trial and leased run, prevent an invocation claim from proving its own effect, keep synthetic evidence durable and bounded, prevent unbounded staging allocation and invocation, keep temporary capabilities out of judge-facing output, and distinguish a passed fixture check from a real business outcome.
 
@@ -25,8 +25,8 @@ The design does not claim that WebMCP itself eliminates prompt injection, provid
 | Supporting fixture → result | Closed fictional scenarios, deterministic rules, and final-state checks; a success-shaped response is insufficient |
 | Top-level page → browser client | Direct imperative registration only; no iframe, declarative, cross-origin, or proposed interaction API dependency |
 | Browser → canary broker | Fixed same-origin path and strict `{ requestId }` body; no caller-supplied URL, environment, account, content, provider, or trial |
-| Canary broker → Social Neuron staging | Server-only credential; HTTPS; rejected redirects; bounded strict responses; exact deployment and safety attestation before mutation; same-request concurrency is single-flighted |
-| Social Neuron worker → canary proof | Actual production-lifecycle worker path plus an independent canary-sink read; the handler claim is never sufficient |
+| Canary broker → External Target staging | Server-only credential; HTTPS; rejected redirects; bounded strict responses; exact deployment and safety attestation before mutation; same-request concurrency is single-flighted |
+| External Target worker → canary proof | Actual production-lifecycle worker path plus an independent canary-sink read; the handler claim is never sufficient |
 
 ## Protected assets
 
@@ -42,7 +42,7 @@ The design does not claim that WebMCP itself eliminates prompt injection, provid
 - Confidentiality of short-lived refund run capabilities while the browser session is active
 - Availability of cancellation, reconciliation, teardown, and repeatable reruns
 
-There are no customer records, production configurations, provider sessions, or live-provider credentials in scope. The refund staging Worker needs no secret, but each live `runId` is a temporary bearer capability and must not be logged, committed, persisted by the frontend, or returned in judge-facing WebMCP output. A deployed Social Neuron canary requires one server-only staging credential and an isolated effect ledger; neither may enter the repository or browser output. Only bounded, non-sensitive proof fields may cross either public result boundary.
+There are no customer records, production configurations, provider sessions, or live-provider credentials in scope. The refund staging Worker needs no secret, but each live `runId` is a temporary bearer capability and must not be logged, committed, persisted by the frontend, or returned in judge-facing WebMCP output. A deployed External Target canary requires one server-only staging credential and an isolated effect ledger; neither may enter the repository or browser output. Only bounded, non-sensitive proof fields may cross either public result boundary.
 
 ## Approval identity
 
@@ -83,8 +83,8 @@ For `false_success_detected`, the business outcome remains not achieved. The UI 
 | A supporting fixture trusts a success-shaped response | Each rule evaluates declared authoritative synthetic state before passing | Real applications must define and protect their own state source |
 | A staging-labelled service points at production or a live provider | Exact identity, aliases, isolation, canary-sink mode, credential absence, egress denial, and production-lifecycle worker mode are attested before mutation | Attestation fields also need infrastructure enforcement and independent deployment review |
 | Browser redirects the canary to another target | Browser can reach only the same-origin broker and send one request ID; target configuration is server-side | An origin compromise remains able to replace application and broker code |
-| Concurrent staging retries duplicate effects | Broker installs one promise per request ID before starting mutation, reuses it, and lets the shared run finish cleanup if an HTTP waiter disconnects; Social Neuron must enforce durable idempotency | Broker cache is bounded and process-local, so upstream idempotency remains mandatory |
-| Social Neuron cleanup hides an unsafe canary result | Canary cleanup failure prevents a pass; fixtures are leased; returned evidence must be append-only | Operators must independently verify retention and abandoned-run cleanup; refund-run cleanup instead relies on explicit requests plus lease expiry |
+| Concurrent staging retries duplicate effects | Broker installs one promise per request ID before starting mutation, reuses it, and lets the shared run finish cleanup if an HTTP waiter disconnects; External Target must enforce durable idempotency | Broker cache is bounded and process-local, so upstream idempotency remains mandatory |
+| External Target cleanup hides an unsafe canary result | Canary cleanup failure prevents a pass; fixtures are leased; returned evidence must be append-only | Operators must independently verify retention and abandoned-run cleanup; refund-run cleanup instead relies on explicit requests plus lease expiry |
 | Malformed or excessive input reaches a tool | Strict schemas reject missing, unknown, wrong-type, and out-of-range values; runtime validation remains mandatory | Browser implementations can differ in pre-validation behavior |
 | Secret-like material reaches output | Public types contain no raw secret fields; output checks and budgets fail closed; public-boundary and history scans are release gates | Pattern checks are defense in depth, not a substitute for source review |
 | UI presents test success as business success | Proof status and observed business outcome are separate; synthetic disclosures are visible; DOM and visual checks cover false-success copy | Copy regressions remain possible without release review |
@@ -104,7 +104,7 @@ Before publishing or deploying:
 8. Verify that false-success completion never appears as a successful business outcome.
 9. Exercise discovery and invocation in the exact agent and WebMCP-capable browser named in the submission, with the frontend configured to the deployed Worker.
 10. Review exact-origin CORS, HTTPS, rate-limit namespace, deployment identity, leases, observability, and deploy include/exclude rules. Treat the reset limiter as abuse pressure only.
-11. If the Social Neuron canary is configured, satisfy every item in its [go-live gate](./docs/integrations/SOCIAL_NEURON_STAGING_CANARY.md), including a genuinely concurrent broker retry test, a real two-trial run, and independent no-provider-effect review.
+11. If the External Target canary is configured, satisfy every item in its [go-live gate](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md), including a genuinely concurrent broker retry test, a real two-trial run, and independent no-provider-effect review.
 12. Obtain explicit release approval before creating a public repository, deployment, video, or Devpost submission.
 
 Security reports must use synthetic reproduction data and contain no credentials or personal information.

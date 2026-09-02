@@ -18,7 +18,7 @@ The local build is credible but not releasable yet. It still lacks a frozen publ
 | The mutating actions were only fixture labels | **Resolved for the hero** | `issue_refund` is now a registered WebMCP target. `stage_refund_comparison` and `prove_refund_comparison` complete the three-tool agent path. The four supporting cases remain deliberately UI-only and are labelled as such. |
 | WebMCP was visually hidden | **Resolved** | An always-visible **Agent tools** strip lists the exact three default tools and shows truthful Ready, Registering, Unavailable, or Failed state plus registered count. |
 | Supporting cases preceded the hero on small screens | **Resolved** | Semantic order is now hero → UI-only suite → supporting details. A 375×667 browser gate requires the full Agent tools strip to remain in the first viewport. |
-| “Real check not connected” looked unfinished | **Resolved** | The disconnected Social Neuron panel now says **Optional staging integration** and **OPTIONAL STAGING · DISABLED**. It has no dead run control, and its visible copy identifies the lower case as a UI-only synthetic fixture. |
+| “Real check not connected” looked unfinished | **Resolved** | The disconnected External Target panel now says **Optional staging integration** and **Optional external-target staging · disabled**. It has no dead run control, and its visible copy identifies the lower case as a UI-only synthetic fixture. |
 | Add `navigator.modelContext` fallback | **Rejected after primary-source review** | The current draft, official README, and Chrome guide use `document.modelContext`. The navigator shape is obsolete history. Keep the aligned adapter and test the deployed URL in the actual judging client. See `2026-08-31-webmcp-api-runtime-followup.md`. |
 | Native WebMCP had not been tested | **Resolved locally, open in judging client** | Installed Chrome native discovery and invocation pass locally. A deployed interactive agent run remains mandatory because browser-to-agent exposure is implementation-defined. |
 | No remote, deployment, or release commit | **Open release blocker** | Obtain explicit public-release approval, freeze the exact commit, rerun scans and tests, create the public repository, and deploy the same build. |
@@ -42,4 +42,4 @@ FrameGuard reviews a proposed visual edit before it is applied. Action Check inv
 
 ## Evidence boundary
 
-The default build remains synthetic and browser-local. It proves the test design and WebMCP interaction, not a real payment-provider guarantee. The optional Social Neuron canary remains excluded from product claims unless its separate staging attestation and live-evidence gate are completed.
+The default build remains synthetic and browser-local. It proves the test design and WebMCP interaction, not a real payment-provider guarantee. The optional External Target canary remains excluded from product claims unless its separate staging attestation and live-evidence gate are completed.

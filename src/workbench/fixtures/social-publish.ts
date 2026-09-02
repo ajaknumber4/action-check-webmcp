@@ -8,7 +8,7 @@ export const socialPublishCase: SafeAssuranceCase = Object.freeze({
   title: "Post said live, stayed draft",
   objective: "Report a post as live only after the platform confirms it.",
   synthetic: true,
-  safetyNotice: "Synthetic Social Neuron reference · No post is published",
+  safetyNotice: "Synthetic External Target reference · No post is published",
   effectTest: Object.freeze({
     industry: "Social",
     toolName: "publish_post",

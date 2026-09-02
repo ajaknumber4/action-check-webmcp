@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const BROKER_PATH = "/api/social-neuron-canary";
+const BROKER_PATH = "/api/external-target-canary";
 const MAX_RESPONSE_CHARACTERS = 32_000;
 const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{7,159}$/;
 
@@ -80,7 +80,7 @@ const reportSchema = z.union([passedSchema, nonPassingSchema]);
 
 export type BrowserCanaryReport = z.infer<typeof reportSchema>;
 
-export type SocialNeuronCanaryAvailability =
+export type ExternalTargetCanaryAvailability =
   | Readonly<{
       state: "ready";
       environment: "staging";
@@ -93,7 +93,7 @@ type BrowserClientOptions = Readonly<{
   createRequestId?: () => string;
 }>;
 
-export class BrowserSocialNeuronCanaryClient {
+export class BrowserExternalTargetCanaryClient {
   readonly #fetch: typeof fetch;
   readonly #createRequestId: () => string;
   #pendingRequestId: string | null = null;
@@ -104,7 +104,7 @@ export class BrowserSocialNeuronCanaryClient {
       options.createRequestId ?? (() => `canary-${crypto.randomUUID()}`);
   }
 
-  async probe(options: { signal?: AbortSignal } = {}): Promise<SocialNeuronCanaryAvailability> {
+  async probe(options: { signal?: AbortSignal } = {}): Promise<ExternalTargetCanaryAvailability> {
     try {
       const response = await this.#fetch(BROKER_PATH, {
         method: "GET",
@@ -194,7 +194,7 @@ function rethrowCallerAbort(
   throw signal.reason ?? error;
 }
 
-export type BrowserSocialNeuronCanaryRunner = Pick<
-  BrowserSocialNeuronCanaryClient,
+export type BrowserExternalTargetCanaryRunner = Pick<
+  BrowserExternalTargetCanaryClient,
   "run"
 >;

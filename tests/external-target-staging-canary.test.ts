@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  createSocialNeuronPublishCanary,
+  createExternalTargetPublishCanary,
   type CanaryAttestation,
   type CanaryPreparation,
   type CanaryTrial,
   type PublishClaim,
   type PublishObservation,
-  type SocialNeuronStagingPort,
-} from "../src/integrations/social-neuron-staging";
+  type ExternalTargetStagingPort,
+} from "../src/integrations/external-target-staging";
 
 const STAGING_IDENTITY = Object.freeze({
-  service: "social-neuron" as const,
+  service: "external-target" as const,
   environment: "staging" as const,
   deploymentId: "sn-staging-deploy-a",
   commitSha: "abcdef123456",
@@ -45,7 +45,7 @@ function observation(
     job: { status: "ready", attemptCount: 0 },
     sink: { status: "draft", deliveryCount: 0, receiptPresent: false },
     evidence: {
-      source: "social-neuron-staging",
+      source: "external-target-staging",
       attestationDigest: preparation.attestationDigest,
       observedAt: "2026-08-30T10:00:00.000Z",
       digest: `sha256:${preparation.runId}:before`,
@@ -54,7 +54,7 @@ function observation(
   };
 }
 
-class FakeStagingPort implements SocialNeuronStagingPort {
+class FakeStagingPort implements ExternalTargetStagingPort {
   readonly calls: string[] = [];
   readonly requestIds: string[] = [];
   readonly cleanedRuns: string[] = [];
@@ -119,7 +119,7 @@ class FakeStagingPort implements SocialNeuronStagingPort {
         ? { status: "draft", deliveryCount: 0, receiptPresent: false }
         : { status: "published", deliveryCount: 1, receiptPresent: true },
       evidence: {
-        source: "social-neuron-staging",
+        source: "external-target-staging",
         attestationDigest: preparation.attestationDigest,
         observedAt: "2026-08-30T10:00:01.000Z",
         digest: `sha256:${preparation.runId}:after`,
@@ -196,9 +196,9 @@ class FakeStagingPort implements SocialNeuronStagingPort {
   }
 }
 
-function createCanary(port: SocialNeuronStagingPort) {
+function createCanary(port: ExternalTargetStagingPort) {
   let id = 0;
-  return createSocialNeuronPublishCanary({
+  return createExternalTargetPublishCanary({
     port,
     expectedIdentity: STAGING_IDENTITY,
     createId: () => `suite-${++id}`,
@@ -206,7 +206,7 @@ function createCanary(port: SocialNeuronStagingPort) {
   });
 }
 
-describe("Social Neuron staging publish canary", () => {
+describe("External Target staging publish canary", () => {
   it("rejects a false publish claim and accepts a matching truthful publish", async () => {
     const port = new FakeStagingPort();
     const report = await createCanary(port).run();

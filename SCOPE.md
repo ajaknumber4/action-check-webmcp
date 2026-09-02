@@ -40,8 +40,8 @@ A web product engineer, integration engineer, or developer-support engineer desi
   - a deployment that claims success while remaining unhealthy;
   - a post that claims success while remaining draft
 - Supporting-fixture sensitivity checks that deliberately remove the protection before running the safe version
-- One optional `run_social_neuron_canary` registration, present only after exact staging readiness attestation
-- A blocked-by-default Social Neuron HTTP adapter and same-origin broker for two fixed staging trials
+- One optional `run_external_target_canary` registration, present only after exact staging readiness attestation
+- A blocked-by-default External Target HTTP adapter and same-origin broker for two fixed staging trials
 - Unit, contract, DOM, browser, accessibility, native-registration, redaction, concurrency, and scenario-semantic evidence
 - Actual judging-client discovery and invocation as a release gate
 
@@ -110,6 +110,6 @@ The four UI-run cases must remain usable without WebMCP and reach these truthful
 
 ### Optional staging canary
 
-When—and only when—the Social Neuron staging go-live gate is satisfied, the false-success trial must be rejected, the truthful control accepted with exactly one canary-sink delivery, both fixtures cleaned up, and no provider request made.
+When—and only when—the External Target staging go-live gate is satisfied, the false-success trial must be rejected, the truthful control accepted with exactly one canary-sink delivery, both fixtures cleaned up, and no provider request made.
 
-Every visible and returned value must be truthful, non-sensitive, bounded, and explicit about whether evidence is synthetic. The external refund staging target and frontend are publicly deployed, and the exact HTTPS pair passed an end-to-end ChatGPT in-app-browser journey plus deployed Chrome/browser suites. The optional canary may create only leased effects in the isolated database and canary sink described by its [go-live contract](./docs/integrations/SOCIAL_NEURON_STAGING_CANARY.md).
+Every visible and returned value must be truthful, non-sensitive, bounded, and explicit about whether evidence is synthetic. The external refund staging target and frontend are publicly deployed, and the exact HTTPS pair passed an end-to-end ChatGPT in-app-browser journey plus deployed Chrome/browser suites. The optional canary may create only leased effects in the isolated database and canary sink described by its [go-live contract](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md).

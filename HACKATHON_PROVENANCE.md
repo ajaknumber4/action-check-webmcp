@@ -36,7 +36,7 @@ All recorded implementation work falls after the submission period opened. Pendi
 - Final-state proof that reports known-bad `2 calls / 2 effects` versus protected `2 calls / 1 effect` and binds its receipt to the exact trial, digest, request ID, deployment, generated UUID effect IDs, and evidence digests
 - Four supporting deterministic fixtures for booking drift, duplicate refunds, cloud false success, and social-publish false success
 - A visible bug-sensitivity check and safe recovery path for each supporting fixture
-- A blocked-by-default Social Neuron staging protocol, browser client, same-origin broker, and optional tool-registration gate
+- A blocked-by-default External Target staging protocol, browser client, same-origin broker, and optional tool-registration gate
 - Browser interface, accessibility behavior, automated tests, public-boundary controls, and release documentation
 
 ## Independence and data origin
@@ -73,7 +73,7 @@ An ExifTool review on 2026-08-31 found no populated EXIF, IPTC, or XMP fields in
 - The main demo proves one Action Check-owned synthetic refund comparison with an external durable outcome plane; it does not test another team's registration or prove a production payment integration or general exactly-once delivery.
 - The four supporting cases show the verification pattern across domains; they are not four live integrations.
 - WebMCP supplies the browser tool boundary, not the approval, idempotency, or postcondition guarantee.
-- The Social Neuron adapter is disconnected. No live staging or public-provider result is claimed.
+- The External Target adapter is disconnected. No live staging or public-provider result is claimed.
 - Native registration tests do not substitute for agent discovery and invocation in the exact judging client.
 - Public repository: https://github.com/ajaknumber4/action-check-webmcp (published as snapshot commits — the initial 2026-09-01 release and subsequent snapshots — while the private working history behind them is the commit table above). Deployment: live (see table). Video and Devpost submission: in progress on 2026-09-01; the Devpost project stays a draft until both are complete.
 

@@ -101,7 +101,7 @@ The fix extends the two-column approval layout and full-width CTA through `max-w
 
 ## Evidence limits
 
-- The unavailable-browser hint, Social Neuron disconnected state, and native registering/failed states were not visually exercised in this run.
+- The unavailable-browser hint, External Target disconnected state, and native registering/failed states were not visually exercised in this run.
 - The audit and remediation used the local build, not the eventual public deployment or frozen release commit.
 - Fable did not perform a second post-fix review; the remediation evidence comes from Playwright, native Chrome, and the in-app Browser run.
 - Full-page in-app-browser captures duplicated fixed/sticky content, so the review used clean viewport captures instead.

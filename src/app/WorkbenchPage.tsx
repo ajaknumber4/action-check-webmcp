@@ -19,7 +19,7 @@ import {
   type RefundStagingTargetStatus,
 } from "./RefundProofHero";
 
-export type SocialNeuronCanaryDisplay =
+export type ExternalTargetCanaryDisplay =
   | Readonly<{ state: "checking" }>
   | Readonly<{ state: "blocked"; reason: string }>
   | Readonly<{ state: "ready"; deploymentId: string }>
@@ -37,8 +37,8 @@ type WorkbenchPageProps = Readonly<{
   registration: RefundProofRegistration;
   stagingTarget?: RefundStagingTargetStatus;
   refundComparisonSimulation?: RefundProofSimulation;
-  socialNeuronCanary: SocialNeuronCanaryDisplay;
-  onRunSocialNeuronCanary(): Promise<void>;
+  externalTargetCanary: ExternalTargetCanaryDisplay;
+  onRunExternalTargetCanary(): Promise<void>;
   onApproveRefundComparison(expected: RefundTrialRef): Promise<void>;
   executeAgent(command: AgentCommand): Promise<Outcome>;
   executeHuman(command: HumanCommand): Promise<Outcome>;
@@ -67,8 +67,8 @@ export function WorkbenchPage({
   registration,
   stagingTarget,
   refundComparisonSimulation,
-  socialNeuronCanary,
-  onRunSocialNeuronCanary,
+  externalTargetCanary,
+  onRunExternalTargetCanary,
   onApproveRefundComparison,
   executeAgent,
   executeHuman,
@@ -261,9 +261,9 @@ export function WorkbenchPage({
           </div>
 
           {view.case.kind === "social_publish" ? (
-            <SocialNeuronCanaryPanel
-              canary={socialNeuronCanary}
-              onRun={onRunSocialNeuronCanary}
+            <ExternalTargetCanaryPanel
+              canary={externalTargetCanary}
+              onRun={onRunExternalTargetCanary}
             />
           ) : null}
 
@@ -288,23 +288,23 @@ export function WorkbenchPage({
   );
 }
 
-function SocialNeuronCanaryPanel({
+function ExternalTargetCanaryPanel({
   canary,
   onRun,
 }: {
-  canary: SocialNeuronCanaryDisplay;
+  canary: ExternalTargetCanaryDisplay;
   onRun(): Promise<void>;
 }) {
   const { title, description, eyebrow, canRun } =
-    socialNeuronCanaryPresentation(canary);
+    externalTargetCanaryPresentation(canary);
 
   return (
     <section
       className={classes("staging-canary", `canary-panel-${canary.state}`)}
-      aria-labelledby="social-neuron-canary-region-title"
+      aria-labelledby="external-target-canary-region-title"
     >
-      <h3 id="social-neuron-canary-region-title" className="visually-hidden">
-        Social Neuron staging check
+      <h3 id="external-target-canary-region-title" className="visually-hidden">
+        External Target staging check
       </h3>
       <div className="canary-status" aria-live="polite">
         <small>{eyebrow}</small>
@@ -331,16 +331,16 @@ function SocialNeuronCanaryPanel({
   );
 }
 
-type SocialNeuronCanaryPresentation = Readonly<{
+type ExternalTargetCanaryPresentation = Readonly<{
   title: string;
   description: string;
   eyebrow: string;
   canRun: boolean;
 }>;
 
-function socialNeuronCanaryPresentation(
-  canary: SocialNeuronCanaryDisplay,
-): SocialNeuronCanaryPresentation {
+function externalTargetCanaryPresentation(
+  canary: ExternalTargetCanaryDisplay,
+): ExternalTargetCanaryPresentation {
   switch (canary.state) {
     case "checking":
       return {
@@ -354,24 +354,24 @@ function socialNeuronCanaryPresentation(
       return {
         title: "Optional staging integration",
         description:
-          "Disabled in this build. Social Neuron staging is not configured; the UI-only fixture below remains synthetic.",
-        eyebrow: "OPTIONAL STAGING · DISABLED",
+          "Disabled in this build. External Target staging is not configured; the UI-only fixture below remains synthetic.",
+        eyebrow: "Optional external-target staging · disabled",
         canRun: false,
       };
     case "ready":
       return {
         title: "Real workflow ready",
         description:
-          "Checks the real Social Neuron worker and staging database without contacting a social network.",
-        eyebrow: "SOCIAL NEURON STAGING · NO PUBLIC POST",
+          "Checks the real External Target worker and staging database without contacting a social network.",
+        eyebrow: "EXTERNAL TARGET STAGING · NO PUBLIC POST",
         canRun: true,
       };
     case "running":
       return {
-        title: "Checking Social Neuron…",
+        title: "Checking External Target…",
         description:
           "Running a false claim and a truthful control in isolated staging. No social network is contacted.",
-        eyebrow: "SOCIAL NEURON STAGING · NO PUBLIC POST",
+        eyebrow: "EXTERNAL TARGET STAGING · NO PUBLIC POST",
         canRun: false,
       };
     case "passed":
@@ -379,7 +379,7 @@ function socialNeuronCanaryPresentation(
         title: "False success caught",
         description:
           "The false publish claim was rejected, while the matching published result was accepted.",
-        eyebrow: "SOCIAL NEURON STAGING · NO PUBLIC POST",
+        eyebrow: "EXTERNAL TARGET STAGING · NO PUBLIC POST",
         canRun: true,
       };
     case "failed":
@@ -387,7 +387,7 @@ function socialNeuronCanaryPresentation(
         title: "Unsafe result found",
         description:
           "The staging result did not satisfy the publish safety contract.",
-        eyebrow: "SOCIAL NEURON STAGING · NO PUBLIC POST",
+        eyebrow: "EXTERNAL TARGET STAGING · NO PUBLIC POST",
         canRun: true,
       };
     case "inconclusive":
@@ -395,7 +395,7 @@ function socialNeuronCanaryPresentation(
         title: "No reliable result",
         description:
           "Staging evidence was incomplete, so Action Check did not pass or fail the workflow.",
-        eyebrow: "SOCIAL NEURON STAGING · NO PUBLIC POST",
+        eyebrow: "EXTERNAL TARGET STAGING · NO PUBLIC POST",
         canRun: true,
       };
     default:
@@ -404,7 +404,7 @@ function socialNeuronCanaryPresentation(
 }
 
 function unreachableCanaryState(state: never): never {
-  throw new Error(`Unhandled Social Neuron canary state: ${String(state)}`);
+  throw new Error(`Unhandled External Target canary state: ${String(state)}`);
 }
 
 function ScenarioSuite({
@@ -628,7 +628,7 @@ function TechnicalDetails({
           <div><dt>Evidence source</dt><dd>{profile.contract.evidenceSource}</dd></div>
           <div><dt>Execution path</dt><dd>UI-only synthetic fixture</dd></div>
         </dl>
-        <p>Synthetic cases stay browser-local. The Social Neuron check runs only through the attested server-side staging broker when connected.</p>
+        <p>Synthetic cases stay browser-local. The External Target check runs only through the attested server-side staging broker when connected.</p>
         {view.receipt ? <button className="download-button" type="button" onClick={onDownload}><DownloadIcon /> Download test report</button> : null}
       </div>
     </details>

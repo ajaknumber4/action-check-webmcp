@@ -3,16 +3,16 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { z } from "zod";
 
 import {
-  createSocialNeuronPublishCanary,
+  createExternalTargetPublishCanary,
   validateCanaryIdentity,
-} from "../../src/integrations/social-neuron-staging/create-social-neuron-publish-canary.ts";
+} from "../../src/integrations/external-target-staging/create-external-target-publish-canary.ts";
 import type {
   ExpectedCanaryIdentity,
-  SocialNeuronCanaryReport,
-} from "../../src/integrations/social-neuron-staging/interface.ts";
-import { HttpSocialNeuronStagingPort } from "./http-port.ts";
+  ExternalTargetCanaryReport,
+} from "../../src/integrations/external-target-staging/interface.ts";
+import { HttpExternalTargetStagingPort } from "./http-port.ts";
 
-const BROKER_PATH = "/api/social-neuron-canary";
+const BROKER_PATH = "/api/external-target-canary";
 const MAX_REQUEST_BYTES = 512;
 const MAX_CACHE_ENTRIES = 64;
 const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{7,159}$/;
@@ -29,22 +29,22 @@ type BrokerOptions = Readonly<{
 }>;
 
 type BrokerConfig = Readonly<{
-  port: HttpSocialNeuronStagingPort;
+  port: HttpExternalTargetStagingPort;
   expectedIdentity: ExpectedCanaryIdentity;
 }>;
 
-export type SocialNeuronCanaryMiddleware = (
+export type ExternalTargetCanaryMiddleware = (
   request: IncomingMessage,
   response: ServerResponse,
   next: Next,
 ) => Promise<void>;
 
-export function createSocialNeuronCanaryMiddleware(
+export function createExternalTargetCanaryMiddleware(
   options: BrokerOptions = {},
-): SocialNeuronCanaryMiddleware {
+): ExternalTargetCanaryMiddleware {
   const environment = options.environment ?? process.env;
   const configured = readConfiguration(environment, options.fetch);
-  const cachedRuns = new Map<string, Promise<SocialNeuronCanaryReport>>();
+  const cachedRuns = new Map<string, Promise<ExternalTargetCanaryReport>>();
   let activeRequestId: string | null = null;
 
   return async (request, response, next) => {
@@ -128,7 +128,7 @@ export function createSocialNeuronCanaryMiddleware(
     }
 
     activeRequestId = requestId;
-    const canary = createSocialNeuronPublishCanary({
+    const canary = createExternalTargetPublishCanary({
       port: configured.port,
       expectedIdentity: configured.expectedIdentity,
     });
@@ -155,17 +155,17 @@ function readConfiguration(
   environment: NodeJS.ProcessEnv,
   fetchImpl: typeof fetch | undefined,
 ): BrokerConfig | null {
-  const baseUrl = environment.SOCIAL_NEURON_STAGING_CANARY_URL;
-  const token = environment.SOCIAL_NEURON_STAGING_CANARY_TOKEN;
-  const deploymentId = environment.SOCIAL_NEURON_STAGING_DEPLOYMENT_ID;
-  const commitSha = environment.SOCIAL_NEURON_STAGING_COMMIT_SHA;
+  const baseUrl = environment.EXTERNAL_TARGET_STAGING_CANARY_URL;
+  const token = environment.EXTERNAL_TARGET_STAGING_CANARY_TOKEN;
+  const deploymentId = environment.EXTERNAL_TARGET_STAGING_DEPLOYMENT_ID;
+  const commitSha = environment.EXTERNAL_TARGET_STAGING_COMMIT_SHA;
   if (!baseUrl || !token || !deploymentId || !commitSha) return null;
 
   let origin: string;
-  let port: HttpSocialNeuronStagingPort;
+  let port: HttpExternalTargetStagingPort;
   try {
     origin = new URL(baseUrl).origin;
-    port = new HttpSocialNeuronStagingPort({
+    port = new HttpExternalTargetStagingPort({
       baseUrl,
       credential: async () => token,
       fetch: fetchImpl,
@@ -177,7 +177,7 @@ function readConfiguration(
   return {
     port,
     expectedIdentity: Object.freeze({
-      service: "social-neuron",
+      service: "external-target",
       environment: "staging",
       deploymentId,
       commitSha,
@@ -278,9 +278,9 @@ async function readBoundedRequest(
 }
 
 function cacheRun(
-  cache: Map<string, Promise<SocialNeuronCanaryReport>>,
+  cache: Map<string, Promise<ExternalTargetCanaryReport>>,
   requestId: string,
-  run: Promise<SocialNeuronCanaryReport>,
+  run: Promise<ExternalTargetCanaryReport>,
 ): void {
   if (cache.size >= MAX_CACHE_ENTRIES) {
     const oldest = cache.keys().next().value as string | undefined;
@@ -290,20 +290,20 @@ function cacheRun(
 }
 
 function evictRun(
-  cache: Map<string, Promise<SocialNeuronCanaryReport>>,
+  cache: Map<string, Promise<ExternalTargetCanaryReport>>,
   requestId: string,
-  run: Promise<SocialNeuronCanaryReport>,
+  run: Promise<ExternalTargetCanaryReport>,
 ): void {
   if (cache.get(requestId) === run) cache.delete(requestId);
 }
 
-function shouldEvictRun(report: SocialNeuronCanaryReport): boolean {
+function shouldEvictRun(report: ExternalTargetCanaryReport): boolean {
   return report.status === "blocked" && report.reason === "REMOTE_FAILURE";
 }
 
 async function writeRunResponse(
   response: ServerResponse,
-  run: Promise<SocialNeuronCanaryReport>,
+  run: Promise<ExternalTargetCanaryReport>,
 ): Promise<void> {
   try {
     const report = await run;
@@ -313,7 +313,7 @@ async function writeRunResponse(
   }
 }
 
-function statusForReport(report: SocialNeuronCanaryReport): number {
+function statusForReport(report: ExternalTargetCanaryReport): number {
   if (report.status === "passed") return 200;
   if (report.status === "inconclusive") return 422;
   if (report.status === "failed") return 409;

@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS,
-  SOCIAL_NEURON_CANARY_TOOL_NAME,
-  registerSocialNeuronCanaryTool,
-} from "../src/adapters/webmcp/register-social-neuron-canary-tool";
+  MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS,
+  EXTERNAL_TARGET_CANARY_TOOL_NAME,
+  registerExternalTargetCanaryTool,
+} from "../src/adapters/webmcp/register-external-target-canary-tool";
 import type {
   BrowserCanaryReport,
-  BrowserSocialNeuronCanaryRunner,
-} from "../src/integrations/social-neuron-staging/browser-client";
+  BrowserExternalTargetCanaryRunner,
+} from "../src/integrations/external-target-staging/browser-client";
 import { InMemoryModelContext } from "../src/testing/in-memory-model-context";
 
 const blockedReport: BrowserCanaryReport = {
@@ -17,31 +17,31 @@ const blockedReport: BrowserCanaryReport = {
   cleanup: "not_needed",
 };
 
-describe("Social Neuron staging WebMCP tool", () => {
+describe("External Target staging WebMCP tool", () => {
   it("is absent until the caller explicitly registers it", async () => {
     const modelContext = new InMemoryModelContext();
     const runner = { run: vi.fn(async () => blockedReport) };
 
-    expect(modelContext.getTool(SOCIAL_NEURON_CANARY_TOOL_NAME)).toBeUndefined();
+    expect(modelContext.getTool(EXTERNAL_TARGET_CANARY_TOOL_NAME)).toBeUndefined();
 
-    const registration = registerSocialNeuronCanaryTool(runner, modelContext);
+    const registration = registerExternalTargetCanaryTool(runner, modelContext);
     await registration.ready;
 
-    expect(modelContext.getTool(SOCIAL_NEURON_CANARY_TOOL_NAME)).toBeDefined();
+    expect(modelContext.getTool(EXTERNAL_TARGET_CANARY_TOOL_NAME)).toBeDefined();
   });
 
   it("publishes a fixed, strict, mutating tool contract", async () => {
     const modelContext = new InMemoryModelContext();
-    const registration = registerSocialNeuronCanaryTool(
+    const registration = registerExternalTargetCanaryTool(
       { run: vi.fn(async () => blockedReport) },
       modelContext,
     );
     await registration.ready;
 
-    const tool = modelContext.getTool(SOCIAL_NEURON_CANARY_TOOL_NAME);
+    const tool = modelContext.getTool(EXTERNAL_TARGET_CANARY_TOOL_NAME);
     expect(tool).toMatchObject({
-      name: "run_social_neuron_canary",
-      title: "Run Social Neuron staging check",
+      name: "run_external_target_canary",
+      title: "Run External Target staging check",
       inputSchema: {
         type: "object",
         properties: {},
@@ -60,11 +60,11 @@ describe("Social Neuron staging WebMCP tool", () => {
   it("rejects unknown fields without invoking the staging runner", async () => {
     const modelContext = new InMemoryModelContext();
     const runner = { run: vi.fn(async () => blockedReport) };
-    const registration = registerSocialNeuronCanaryTool(runner, modelContext);
+    const registration = registerExternalTargetCanaryTool(runner, modelContext);
     await registration.ready;
 
     const serialized = await modelContext.invoke(
-      SOCIAL_NEURON_CANARY_TOOL_NAME,
+      EXTERNAL_TARGET_CANARY_TOOL_NAME,
       { target: "production", account: "caller-selected" },
     );
 
@@ -80,25 +80,25 @@ describe("Social Neuron staging WebMCP tool", () => {
   it("forwards the caller AbortSignal and returns the bounded report", async () => {
     const modelContext = new InMemoryModelContext();
     let observedSignal: AbortSignal | undefined;
-    const runner: BrowserSocialNeuronCanaryRunner = {
+    const runner: BrowserExternalTargetCanaryRunner = {
       async run(options) {
         observedSignal = options?.signal;
         return blockedReport;
       },
     };
-    const registration = registerSocialNeuronCanaryTool(runner, modelContext);
+    const registration = registerExternalTargetCanaryTool(runner, modelContext);
     await registration.ready;
     const execution = new AbortController();
 
     const serialized = await modelContext.invoke(
-      SOCIAL_NEURON_CANARY_TOOL_NAME,
+      EXTERNAL_TARGET_CANARY_TOOL_NAME,
       {},
       { signal: execution.signal },
     );
 
     expect(observedSignal).toBe(execution.signal);
     expect(serialized.length).toBeLessThanOrEqual(
-      MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS,
+      MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS,
     );
     expect(JSON.parse(serialized)).toEqual(blockedReport);
   });
@@ -106,7 +106,7 @@ describe("Social Neuron staging WebMCP tool", () => {
   it("propagates cancellation to a running canary", async () => {
     const modelContext = new InMemoryModelContext();
     let observedSignal: AbortSignal | undefined;
-    const runner: BrowserSocialNeuronCanaryRunner = {
+    const runner: BrowserExternalTargetCanaryRunner = {
       async run(options) {
         observedSignal = options?.signal;
         return await new Promise<BrowserCanaryReport>((_resolve, reject) => {
@@ -118,12 +118,12 @@ describe("Social Neuron staging WebMCP tool", () => {
         });
       },
     };
-    const registration = registerSocialNeuronCanaryTool(runner, modelContext);
+    const registration = registerExternalTargetCanaryTool(runner, modelContext);
     await registration.ready;
     const execution = new AbortController();
 
     const invocation = modelContext.invoke(
-      SOCIAL_NEURON_CANARY_TOOL_NAME,
+      EXTERNAL_TARGET_CANARY_TOOL_NAME,
       {},
       { signal: execution.signal },
     );
@@ -139,21 +139,21 @@ describe("Social Neuron staging WebMCP tool", () => {
     const oversized = {
       ...blockedReport,
       unexpectedEvidence: "x".repeat(
-        MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS * 2,
+        MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS * 2,
       ),
     } as unknown as BrowserCanaryReport;
-    const registration = registerSocialNeuronCanaryTool(
+    const registration = registerExternalTargetCanaryTool(
       { run: vi.fn(async () => oversized) },
       modelContext,
     );
     await registration.ready;
 
     const serialized = await modelContext.invoke(
-      SOCIAL_NEURON_CANARY_TOOL_NAME,
+      EXTERNAL_TARGET_CANARY_TOOL_NAME,
     );
 
     expect(serialized.length).toBeLessThanOrEqual(
-      MAX_SOCIAL_NEURON_CANARY_RESULT_CHARACTERS,
+      MAX_EXTERNAL_TARGET_CANARY_RESULT_CHARACTERS,
     );
     expect(JSON.parse(serialized)).toEqual({
       status: "blocked",
@@ -165,7 +165,7 @@ describe("Social Neuron staging WebMCP tool", () => {
 
   it("unregisters the optional tool when disposed", async () => {
     const modelContext = new InMemoryModelContext();
-    const registration = registerSocialNeuronCanaryTool(
+    const registration = registerExternalTargetCanaryTool(
       { run: vi.fn(async () => blockedReport) },
       modelContext,
     );
@@ -174,9 +174,9 @@ describe("Social Neuron staging WebMCP tool", () => {
     registration.dispose();
     registration.dispose();
 
-    expect(modelContext.getTool(SOCIAL_NEURON_CANARY_TOOL_NAME)).toBeUndefined();
+    expect(modelContext.getTool(EXTERNAL_TARGET_CANARY_TOOL_NAME)).toBeUndefined();
     await expect(
-      modelContext.invoke(SOCIAL_NEURON_CANARY_TOOL_NAME),
+      modelContext.invoke(EXTERNAL_TARGET_CANARY_TOOL_NAME),
     ).rejects.toThrow("No registered tool");
   });
 });

@@ -1,7 +1,7 @@
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { SOCIAL_NEURON_CANARY_TOOL_NAME } from "../src/adapters/webmcp";
+import { EXTERNAL_TARGET_CANARY_TOOL_NAME } from "../src/adapters/webmcp";
 import type { WebMcpToolDefinition } from "../src/adapters/webmcp/model-context-registrar";
 import { App } from "../src/app/App";
 
@@ -11,7 +11,7 @@ afterEach(() => {
   Reflect.deleteProperty(document, "modelContext");
 });
 
-describe("Social Neuron canary app registration", () => {
+describe("External Target canary app registration", () => {
   it("registers and runs the fixed tool only after staging readiness attests", async () => {
     const tools = new Map<string, WebMcpToolDefinition>();
     Object.defineProperty(document, "modelContext", {
@@ -74,12 +74,12 @@ describe("Social Neuron canary app registration", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(tools.has(SOCIAL_NEURON_CANARY_TOOL_NAME)).toBe(true);
+      expect(tools.has(EXTERNAL_TARGET_CANARY_TOOL_NAME)).toBe(true);
     });
 
     let result: unknown;
     await act(async () => {
-      result = await tools.get(SOCIAL_NEURON_CANARY_TOOL_NAME)?.execute({});
+      result = await tools.get(EXTERNAL_TARGET_CANARY_TOOL_NAME)?.execute({});
     });
 
     expect(result).toMatchObject({

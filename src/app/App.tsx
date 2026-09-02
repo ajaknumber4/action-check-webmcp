@@ -3,7 +3,7 @@ import {
   detectBrowserModelContext,
   REFUND_COMPARISON_TOOL_NAMES,
   registerRefundComparisonTools,
-  registerSocialNeuronCanaryTool,
+  registerExternalTargetCanaryTool,
   type RefundComparisonToolRegistrationStatus,
 } from "../adapters/webmcp";
 import { useRefundComparisonView } from "../adapters/react/use-refund-comparison-view";
@@ -11,9 +11,9 @@ import { useSimulatedRefundComparisonRunner } from "../adapters/react/use-simula
 import { useWorkbenchView } from "../adapters/react/use-workbench-view";
 import { createSimulatedRefundComparisonRunner } from "../adapters/simulated-agent/run-simulated-refund-comparison";
 import {
-  BrowserSocialNeuronCanaryClient,
+  BrowserExternalTargetCanaryClient,
   type BrowserCanaryReport,
-} from "../integrations/social-neuron-staging";
+} from "../integrations/external-target-staging";
 import {
   HttpRefundEffectTarget,
   UnavailableRefundEffectTarget,
@@ -34,7 +34,7 @@ import {
 } from "../workbench";
 import {
   WorkbenchPage,
-  type SocialNeuronCanaryDisplay,
+  type ExternalTargetCanaryDisplay,
 } from "./WorkbenchPage";
 import type {
   RefundProofRegistration,
@@ -69,22 +69,22 @@ export function App() {
   const [registration, setRegistration] = useState<RefundProofRegistration>(
     initialRegistrationDisplay,
   );
-  const [socialNeuronClient] = useState(
-    () => new BrowserSocialNeuronCanaryClient(),
+  const [externalTargetClient] = useState(
+    () => new BrowserExternalTargetCanaryClient(),
   );
-  const [socialNeuronCanary, setSocialNeuronCanary] =
-    useState<SocialNeuronCanaryDisplay>({ state: "checking" });
-  const socialNeuronCanaryRef = useRef(socialNeuronCanary);
-  socialNeuronCanaryRef.current = socialNeuronCanary;
+  const [externalTargetCanary, setExternalTargetCanary] =
+    useState<ExternalTargetCanaryDisplay>({ state: "checking" });
+  const externalTargetCanaryRef = useRef(externalTargetCanary);
+  externalTargetCanaryRef.current = externalTargetCanary;
 
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
-    void socialNeuronClient
+    void externalTargetClient
       .probe({ signal: controller.signal })
       .then((availability) => {
         if (!active) return;
-        setSocialNeuronCanary(
+        setExternalTargetCanary(
           availability.state === "ready"
             ? {
                 state: "ready",
@@ -95,7 +95,7 @@ export function App() {
       })
       .catch(() => {
         if (active) {
-          setSocialNeuronCanary({
+          setExternalTargetCanary({
             state: "blocked",
             reason: "STAGING_REQUEST_FAILED",
           });
@@ -105,7 +105,7 @@ export function App() {
       active = false;
       controller.abort();
     };
-  }, [socialNeuronClient]);
+  }, [externalTargetClient]);
 
   useEffect(() => {
     const availability = detectBrowserModelContext();
@@ -134,9 +134,9 @@ export function App() {
     };
   }, [refundComparison]);
 
-  const executeSocialNeuronCanary = useCallback(
+  const executeExternalTargetCanary = useCallback(
     async (options: { signal?: AbortSignal } = {}): Promise<BrowserCanaryReport> => {
-      const current = socialNeuronCanaryRef.current;
+      const current = externalTargetCanaryRef.current;
       if (current.state === "checking" || current.state === "blocked") {
         return blockedCanaryReport("STAGING_NOT_CONFIGURED");
       }
@@ -145,37 +145,37 @@ export function App() {
       }
 
       const deploymentId = current.deploymentId;
-      setSocialNeuronCanary({ state: "running", deploymentId });
+      setExternalTargetCanary({ state: "running", deploymentId });
       try {
-        const report = await socialNeuronClient.run(options);
-        setSocialNeuronCanary(toCanaryDisplay(report, deploymentId));
+        const report = await externalTargetClient.run(options);
+        setExternalTargetCanary(toCanaryDisplay(report, deploymentId));
         return report;
       } catch (error: unknown) {
-        setSocialNeuronCanary({ state: "ready", deploymentId });
+        setExternalTargetCanary({ state: "ready", deploymentId });
         throw error;
       }
     },
-    [socialNeuronClient],
+    [externalTargetClient],
   );
 
   const canExposeStagingTool =
-    socialNeuronCanary.state !== "checking" &&
-    socialNeuronCanary.state !== "blocked";
+    externalTargetCanary.state !== "checking" &&
+    externalTargetCanary.state !== "blocked";
 
   useEffect(() => {
     if (!canExposeStagingTool) return;
     const availability = detectBrowserModelContext();
     if (availability.state === "unavailable") return;
 
-    const canaryRegistration = registerSocialNeuronCanaryTool(
-      { run: executeSocialNeuronCanary },
+    const canaryRegistration = registerExternalTargetCanaryTool(
+      { run: executeExternalTargetCanary },
       availability.registrar,
     );
     void canaryRegistration.ready.catch(() => {
       // The three synthetic hero tools remain available if this optional tool fails.
     });
     return () => canaryRegistration.dispose();
-  }, [canExposeStagingTool, executeSocialNeuronCanary]);
+  }, [canExposeStagingTool, executeExternalTargetCanary]);
 
   useEffect(() => {
     const closeOnPageExit = (event: PageTransitionEvent) => {
@@ -196,9 +196,9 @@ export function App() {
     (command: HumanCommand): Promise<Outcome> => session.human.execute(command),
     [session],
   );
-  const runSocialNeuronCanary = useCallback(async () => {
-    await executeSocialNeuronCanary();
-  }, [executeSocialNeuronCanary]);
+  const runExternalTargetCanary = useCallback(async () => {
+    await executeExternalTargetCanary();
+  }, [executeExternalTargetCanary]);
   const approveRefundComparison = useCallback(
     async (expected: RefundTrialRef) => {
       const outcome = await refundComparison.human.approve(expected);
@@ -229,8 +229,8 @@ export function App() {
       registration={registration}
       stagingTarget={refundTarget.status}
       refundComparisonSimulation={refundComparisonSimulation}
-      socialNeuronCanary={socialNeuronCanary}
-      onRunSocialNeuronCanary={runSocialNeuronCanary}
+      externalTargetCanary={externalTargetCanary}
+      onRunExternalTargetCanary={runExternalTargetCanary}
       onApproveRefundComparison={approveRefundComparison}
       executeAgent={executeAgent}
       executeHuman={executeHuman}
@@ -278,7 +278,7 @@ function createAppRefundTarget(): Readonly<{
 function toCanaryDisplay(
   report: BrowserCanaryReport,
   fallbackDeploymentId: string,
-): SocialNeuronCanaryDisplay {
+): ExternalTargetCanaryDisplay {
   if (report.status === "passed") {
     return { state: "passed", deploymentId: report.deploymentId };
   }

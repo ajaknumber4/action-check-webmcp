@@ -66,4 +66,4 @@ The historical pre-hero audits remain in the repository with prominent supersede
 7. Record and publish the under-three-minute YouTube demo.
 8. Fill participant-specific Devpost fields and perform the explicit final submission.
 
-The Social Neuron canary is not a blocker for the synthetic hero. It must remain visibly disconnected and excluded from claims unless its separate go-live gate is completed.
+The External Target canary is not a blocker for the synthetic hero. It must remain visibly disconnected and excluded from claims unless its separate go-live gate is completed.

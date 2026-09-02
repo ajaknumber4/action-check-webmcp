@@ -7,12 +7,12 @@ import type {
   NonPassingCanaryReport,
   PublishClaim,
   PublishObservation,
-  SocialNeuronPublishCanary,
-  SocialNeuronStagingPort,
+  ExternalTargetPublishCanary,
+  ExternalTargetStagingPort,
 } from "./interface.ts";
 
 type CanaryConfig = Readonly<{
-  port: SocialNeuronStagingPort;
+  port: ExternalTargetStagingPort;
   expectedIdentity: ExpectedCanaryIdentity;
   createId?: () => string;
   now?: () => number;
@@ -29,9 +29,9 @@ type TrialResult =
       cleanup: NonPassingCanaryReport["cleanup"];
     }>;
 
-export function createSocialNeuronPublishCanary(
+export function createExternalTargetPublishCanary(
   config: CanaryConfig,
-): SocialNeuronPublishCanary {
+): ExternalTargetPublishCanary {
   const createId = config.createId ?? (() => crypto.randomUUID());
   const now = config.now ?? Date.now;
 
@@ -133,7 +133,7 @@ export function createSocialNeuronPublishCanary(
 }
 
 async function runTrial(
-  port: SocialNeuronStagingPort,
+  port: ExternalTargetStagingPort,
   trial: CanaryTrial,
   requestId: string,
   options: { signal?: AbortSignal },
@@ -299,7 +299,7 @@ function completeObservation(
     observation.job.attemptCount >= 0 &&
     Number.isSafeInteger(observation.sink.deliveryCount) &&
     observation.sink.deliveryCount >= 0 &&
-    observation.evidence.source === "social-neuron-staging" &&
+    observation.evidence.source === "external-target-staging" &&
     observation.evidence.attestationDigest === preparation.attestationDigest &&
     nonEmpty(observation.post.version) &&
     Number.isFinite(Date.parse(observation.evidence.observedAt)) &&

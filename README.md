@@ -58,7 +58,7 @@ The top-level page registers exactly these three tools by default:
 
 Inputs use strict schemas, cancellation is forwarded, registration is cleaned up with the page lifecycle, and calls fail closed when approval is missing, stale, or inconsistent with the input.
 
-When a same-origin readiness check verifies the exact isolated staging identity, the page may additionally register `run_social_neuron_canary`. That optional tool is absent by default and exposes no account, provider, content, environment, credential, or URL selection.
+When a same-origin readiness check verifies the exact isolated staging identity, the page may additionally register `run_external_target_canary`. That optional tool is absent by default and exposes no account, provider, content, environment, credential, or URL selection.
 
 ## Supporting synthetic cases
 
@@ -73,7 +73,7 @@ The lower test suite shows that the verification pattern applies beyond refunds:
 
 These four fixtures are deterministic UI-run examples; they are not four additional registered WebMCP targets. **Run 4 UI examples** checks the set. **Prove this test catches the bug** deliberately removes the relevant protection, and **Run safe version** restores it.
 
-Social Neuron is one reference case, not the product boundary.
+The refund fixture is the first target, not the product boundary.
 
 ## Why this fits WebMCP
 
@@ -93,14 +93,14 @@ It does not claim that WebMCP automatically provides authorization, idempotency,
 - `workers/refund-staging-target` is the separately deployable synthetic outcome service. It isolates each lane in a leased SQLite Durable Object, enforces exactly two invocations per run, and rate-limits reset allocation; its invoke response cannot supply proof.
 - `src/app/RefundProofHero.tsx` renders native status, the human checkpoint, lane state, and the final comparison.
 - `src/workbench/fixtures` and `src/workbench/scenarios` implement the four supporting synthetic cases.
-- `src/integrations/social-neuron-staging` defines the blocked-by-default staging canary contract.
-- `server/social-neuron-staging` contains the same-origin broker that would keep a staging credential out of the browser.
+- `src/integrations/external-target-staging` defines the blocked-by-default staging canary contract.
+- `server/external-target-staging` contains the same-origin broker that would keep a staging credential out of the browser.
 
-## Social Neuron staging status
+## Connecting a real site (optional staging canary)
 
-The staging adapter is implemented on the Action Check side and fails closed. Its required Social Neuron endpoints, isolated database, production-lifecycle worker wiring, and independent canary sink are not deployed or configured in this repository. The UI therefore labels it **Optional staging integration · disabled** by default, exposes no run control, and claims no live Social Neuron result.
+The staging adapter is implemented on the Action Check side and fails closed. The required endpoints on an external target, an isolated database, production-lifecycle worker wiring, and an independent canary sink are not deployed or configured in this repository. The UI therefore labels it **Optional external-target staging · disabled** by default, exposes no run control, and claims no live result from a connected site.
 
-See the [staging canary contract and go-live gate](./docs/integrations/SOCIAL_NEURON_STAGING_CANARY.md).
+See the [staging canary contract and go-live gate](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md).
 
 ## Run locally
 
@@ -140,7 +140,7 @@ Release results are recorded in [docs/QA_EVIDENCE.md](./docs/QA_EVIDENCE.md). Th
 - The staging ledger is separate from the browser session and durable for the trial, but it is not a payment-provider record or independently operated production system.
 - `issue_refund` is Action Check's own WebMCP fixture backed by that Worker, not an independently registered tool from another team.
 - The four supporting cases are product hypotheses, not customer incidents or measured production demand.
-- The configured hero contacts only the synthetic refund staging target. It never calls a payment processor, Social Neuron, or another production system.
+- The configured hero contacts only the synthetic refund staging target. It never calls a payment processor, a connected external-target site, or another production system.
 - The external target is a publicly reachable synthetic staging service with bounded 15-minute leases. It is not authenticated product infrastructure and must not be used for real data.
 - A successful check means the declared synthetic rule was evaluated correctly; it does not mean a real business action succeeded.
 
@@ -152,7 +152,7 @@ See [PUBLIC_PRIVATE_BOUNDARY.md](./PUBLIC_PRIVATE_BOUNDARY.md), [SECURITY.md](./
 - [Hackathon provenance](./HACKATHON_PROVENANCE.md)
 - [Design specification](./docs/DESIGN_SPEC.md)
 - [Refund staging target](./workers/refund-staging-target/README.md)
-- [Social Neuron staging canary contract](./docs/integrations/SOCIAL_NEURON_STAGING_CANARY.md)
+- [External Target staging canary contract](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md)
 - [Boundary-check usage](./docs/PUBLIC_BOUNDARY_CHECK.md)
 - [Third-party notices](./THIRD_PARTY_NOTICES.md)
 - [Current hackathon-audit reconciliation](./docs/audits/2026-08-31-hackathon-audit-reconciliation.md)

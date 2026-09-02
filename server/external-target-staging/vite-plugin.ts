@@ -1,14 +1,14 @@
 import type { Connect, Plugin } from "vite";
 
 import {
-  createSocialNeuronCanaryMiddleware,
-  type SocialNeuronCanaryMiddleware,
+  createExternalTargetCanaryMiddleware,
+  type ExternalTargetCanaryMiddleware,
 } from "./broker.ts";
 
-export function socialNeuronCanaryBrokerPlugin(): Plugin {
-  const canary = createSocialNeuronCanaryMiddleware();
+export function externalTargetCanaryBrokerPlugin(): Plugin {
+  const canary = createExternalTargetCanaryMiddleware();
   return {
-    name: "action-check-social-neuron-canary-broker",
+    name: "action-check-external-target-canary-broker",
     configureServer(server) {
       server.middlewares.use(asConnectMiddleware(canary));
     },
@@ -19,7 +19,7 @@ export function socialNeuronCanaryBrokerPlugin(): Plugin {
 }
 
 function asConnectMiddleware(
-  middleware: SocialNeuronCanaryMiddleware,
+  middleware: ExternalTargetCanaryMiddleware,
 ): Connect.NextHandleFunction {
   return (request, response, next) => {
     void middleware(request, response, next).catch(next);

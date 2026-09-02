@@ -38,7 +38,7 @@ The existing workbench also demonstrates four cross-industry failure modes using
 - Cloud operations: a deployment claims success while the service remains unhealthy.
 - Publishing: a post claims to be live while it remains a draft.
 
-The Social Neuron staging integration is **not connected and is not part of the hero demonstration**. The submission must not imply otherwise.
+The external-target staging integration is **not connected and is not part of the hero demonstration**. The submission must not imply otherwise.
 
 ## Why This Matters
 
@@ -100,7 +100,7 @@ Codex supported the project as a build and review partner by:
 - **Visible shared state:** the person and agent work against the same page-owned trial and proof state.
 - **Cross-industry breadth:** four deterministic fixtures cover stale approval, duplicate effects, and false success in travel, payments, cloud operations, and publishing.
 - **Negative controls:** supporting workbench cases can deliberately remove a protection so the test must catch the resulting failure.
-- **Fail-closed staging boundary:** an optional Social Neuron adapter remains unavailable unless an isolated staging service supplies the required attestation. The current UI labels it as an optional disabled integration rather than a working feature.
+- **Fail-closed staging boundary:** an optional external-target adapter remains unavailable unless an isolated staging service supplies the required attestation. The current UI labels it as an optional disabled integration rather than a working feature.
 
 **Verification status:** the release passes 21 app test files / 140 tests, 1 Worker file / 11 tests plus generated bindings, types, local and production Wrangler dry-runs, 16/16 desktop/mobile browser journeys with Axe and keyboard assertions, a production build, and 1/1 installed-Chrome native WebMCP journey. The same 16 browser journeys and native journey pass against the stable public URL. An interactive ChatGPT in-app-browser run completed reset → visible approval → four invokes → proof with outcomes `ACK_LOST`, `ok`, `ACK_LOST`, `ok`, observed **2 versus 1**, and zero console/page warnings or errors.
 
@@ -124,7 +124,7 @@ Action Check uses the imperative `document.modelContext` API from the active top
 - Immutable fixture and effect-contract modules describe the four cross-industry cases.
 - A shared application command layer supports both the human UI and registered workbench tools.
 - The React interface renders the contract, injected failure, approval state, execution trace, and resulting evidence.
-- The optional Social Neuron adapter is isolated behind a same-origin broker and exact staging attestation, but the required upstream staging system is not deployed or configured.
+- The optional external-target adapter is isolated behind a same-origin broker and exact staging attestation, but the required upstream staging system is not deployed or configured.
 
 The four supporting action names are synthetic scenarios. The refund hero proves a real invocation of Action Check's own registered WebMCP fixture end to end; it does not establish that the project can already attach to another site's independently registered tool. The final entry must not claim that the four supporting actions are native targets.
 
@@ -199,7 +199,7 @@ Target: narrated, public, under three minutes, with the working result visible i
 - **2:05–2:20 — Breadth:** briefly show stale booking approval, false deployment success, and false publishing success as supporting UI-only synthetic cases.
 - **2:20–2:35 — Value:** consequential WebMCP teams can adapt the same approval, retry, and postcondition checks to catch unsafe effects before production.
 
-Do not show or claim a live Social Neuron staging run. Remove setup delays, dead air, terminal installation steps, and unverified claims from the final cut.
+Do not show or claim a live external-target staging run. Remove setup delays, dead air, terminal installation steps, and unverified claims from the final cut.
 
 ## Screenshot Shot List
 
@@ -252,7 +252,7 @@ Capture all images from the final deployed build and final browser/client versio
 - The Worker and WebMCP fixture are both owned by Action Check. Their separation proves the pattern, not independent third-party attestation or compatibility with another team's registered tool.
 - The reset rate limiter is a permissive, per-location abuse-pressure guard, not authentication or globally exact accounting. The strong safety bound is the exact two-invocation ceiling inside each run Durable Object.
 - The four supporting cases prove reusable failure patterns with synthetic data. They are not evidence of four production integrations.
-- Social Neuron staging is not connected. Its endpoints, isolated database, worker lifecycle, and independent canary sink are not deployed or configured for this project, and it is excluded from the hero demo.
+- External-target staging is not connected. Its endpoints, isolated database, worker lifecycle, and independent canary sink are not deployed or configured for this project, and it is excluded from the hero demo.
 - The exact verified judging clients are the ChatGPT desktop in-app browser and Chrome 152 with WebMCP testing enabled; other draft implementations may differ.
 - WebMCP is an evolving draft with client-specific implementation differences. The final testing instructions must name the exact verified client and version.
 - The live URL, public repository, and three final deployed screenshots are present. The public narrated video, participant-specific form choices, and explicit final submit remain open.

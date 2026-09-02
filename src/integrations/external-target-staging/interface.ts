@@ -3,7 +3,7 @@ export type CanaryEnvironment = "development" | "staging" | "production";
 export type CanaryTrial = "false_success" | "truthful_success";
 
 export type CanaryAttestation = Readonly<{
-  service: "social-neuron";
+  service: "external-target";
   environment: CanaryEnvironment;
   deploymentId: string;
   commitSha: string;
@@ -58,7 +58,7 @@ export type PublishObservation = Readonly<{
     receiptPresent: boolean;
   }>;
   evidence: Readonly<{
-    source: "social-neuron-staging";
+    source: "external-target-staging";
     attestationDigest: string;
     observedAt: string;
     digest: string;
@@ -73,7 +73,7 @@ export type PublishClaim = Readonly<{
   externalIdPresent: boolean;
 }>;
 
-export interface SocialNeuronStagingPort {
+export interface ExternalTargetStagingPort {
   attest(options?: { signal?: AbortSignal }): Promise<CanaryAttestation>;
   prepare(
     trial: CanaryTrial,
@@ -133,13 +133,13 @@ export type NonPassingCanaryReport = Readonly<{
   cleanup: "not_needed" | "completed" | "failed";
 }>;
 
-export type SocialNeuronCanaryReport =
+export type ExternalTargetCanaryReport =
   | PassedCanaryReport
   | NonPassingCanaryReport;
 
-export interface SocialNeuronPublishCanary {
+export interface ExternalTargetPublishCanary {
   run(options?: {
     requestId?: string;
     signal?: AbortSignal;
-  }): Promise<SocialNeuronCanaryReport>;
+  }): Promise<ExternalTargetCanaryReport>;
 }

@@ -215,8 +215,8 @@ test("shows four synthetic effect contracts with no production effects", async (
     suite.getByRole("button", { name: /Post said live, stayed draft/ }),
   ).toBeVisible();
   await suite.getByRole("button", { name: /Post said live, stayed draft/ }).click();
-  const staging = page.getByRole("region", { name: "Social Neuron staging check" });
-  await expect(staging.getByText("OPTIONAL STAGING · DISABLED", { exact: true })).toBeVisible();
+  const staging = page.getByRole("region", { name: "External Target staging check" });
+  await expect(staging.getByText("Optional external-target staging · disabled", { exact: true })).toBeVisible();
   await expect(staging.getByText("Optional staging integration", { exact: true })).toBeVisible();
 
   const accessibility = await new AxeBuilder({ page }).analyze();

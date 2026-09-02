@@ -183,7 +183,7 @@ describe("RefundProofHero", () => {
     }
     expect(tools.getByText("Ready", { exact: true })).toBeVisible();
     expect(tools.getByText("3 registered tools", { exact: true })).toBeVisible();
-    expect(tools.queryByText("run_social_neuron_canary")).not.toBeInTheDocument();
+    expect(tools.queryByText("run_external_target_canary")).not.toBeInTheDocument();
   });
 
   it("keeps registered WebMCP tools visibly blocked when external staging is missing", () => {

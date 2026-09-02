@@ -3,8 +3,8 @@ import type { AddressInfo } from "node:net";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { createSocialNeuronPublishCanary } from "../src/integrations/social-neuron-staging";
-import { HttpSocialNeuronStagingPort } from "../server/social-neuron-staging/http-port";
+import { createExternalTargetPublishCanary } from "../src/integrations/external-target-staging";
+import { HttpExternalTargetStagingPort } from "../server/external-target-staging/http-port";
 
 type RecordedRequest = Readonly<{
   method: string;
@@ -14,7 +14,7 @@ type RecordedRequest = Readonly<{
   body: string;
 }>;
 
-describe("HTTP Social Neuron staging port", () => {
+describe("HTTP External Target staging port", () => {
   let origin = "";
   let malformedAttestation = false;
   const requests: RecordedRequest[] = [];
@@ -35,7 +35,7 @@ describe("HTTP Social Neuron staging port", () => {
         return json(response, 200, malformedAttestation
           ? { environment: "staging" }
           : {
-              service: "social-neuron",
+              service: "external-target",
               environment: "staging",
               deploymentId: "deploy-test",
               commitSha: "abcdef123456",
@@ -112,7 +112,7 @@ describe("HTTP Social Neuron staging port", () => {
               ? { status: "published", deliveryCount: 1, receiptPresent: true }
               : { status: "draft", deliveryCount: 0, receiptPresent: false },
             evidence: {
-              source: "social-neuron-staging",
+              source: "external-target-staging",
               attestationDigest: "sha256:attestation",
               observedAt: after
                 ? "2026-08-30T10:00:01.000Z"
@@ -148,14 +148,14 @@ describe("HTTP Social Neuron staging port", () => {
   });
 
   it("runs both fixed trials over bounded authenticated HTTP calls", async () => {
-    const port = new HttpSocialNeuronStagingPort({
+    const port = new HttpExternalTargetStagingPort({
       baseUrl: origin,
       credential: async () => "test-only-token",
     });
-    const report = await createSocialNeuronPublishCanary({
+    const report = await createExternalTargetPublishCanary({
       port,
       expectedIdentity: {
-        service: "social-neuron",
+        service: "external-target",
         environment: "staging",
         deploymentId: "deploy-test",
         commitSha: "abcdef123456",
@@ -189,7 +189,7 @@ describe("HTTP Social Neuron staging port", () => {
       "DELETE /internal/action-check/runs/run-truthful_success",
     ]);
     expect(requests.every(({ authorization }) => authorization === "Bearer test-only-token")).toBe(true);
-    expect(requests.every(({ contract }) => contract === "social-neuron-publish-canary-v1")).toBe(true);
+    expect(requests.every(({ contract }) => contract === "external-publish-canary-v1")).toBe(true);
     expect(requests.find(({ url }) => url.endsWith("/execute"))?.body).toBe(
       JSON.stringify({ requestId: "suite-http-false_success" }),
     );
@@ -197,13 +197,13 @@ describe("HTTP Social Neuron staging port", () => {
 
   it("rejects malformed boundary evidence without including the bearer in the error", async () => {
     malformedAttestation = true;
-    const port = new HttpSocialNeuronStagingPort({
+    const port = new HttpExternalTargetStagingPort({
       baseUrl: origin,
       credential: async () => "never-leak-this-token",
     });
 
     await expect(port.attest()).rejects.toMatchObject({
-      name: "SocialNeuronStagingResponseError",
+      name: "ExternalTargetStagingResponseError",
       code: "MALFORMED_STAGING_RESPONSE",
     });
     await expect(port.attest()).rejects.not.toThrow("never-leak-this-token");
@@ -214,7 +214,7 @@ describe("HTTP Social Neuron staging port", () => {
 
     expect(
       () =>
-        new HttpSocialNeuronStagingPort({
+        new HttpExternalTargetStagingPort({
           baseUrl: "http://staging.example.test",
           credential: async () => {
             credentialReads += 1;
@@ -243,7 +243,7 @@ describe("HTTP Social Neuron staging port", () => {
         headers: { "content-type": "application/json" },
       });
     };
-    const port = new HttpSocialNeuronStagingPort({
+    const port = new HttpExternalTargetStagingPort({
       baseUrl: origin,
       credential: async () => "test-only-token",
       fetch: fetchWithStalledBody,

@@ -9,7 +9,7 @@
 
 The candidate public file set contains no detected credential or personal-information leak. Both dependency trees report zero known vulnerabilities. The refund Worker has strong bounds around input, capability lifetime, mutation count, evidence, CORS, and cleanup. Its production environment names one exact HTTPS frontend origin and an immutable release deployment ID. The public repository is published from a new, sanitized release root so older local author metadata is not exposed.
 
-Two Medium, non-blocking hardening items remain: treat the anonymous reset route as cost-abuse exposure rather than authentication, and keep the optional Social Neuron broker disabled unless it receives real caller authentication and rate limiting. The frontend now ships the exact release CSP and required security headers. None of the residual items can create a real refund or provider effect in the submitted synthetic configuration.
+Two Medium, non-blocking hardening items remain: treat the anonymous reset route as cost-abuse exposure rather than authentication, and keep the optional External Target broker disabled unless it receives real caller authentication and rate limiting. The frontend now ships the exact release CSP and required security headers. None of the residual items can create a real refund or provider effect in the submitted synthetic configuration.
 
 | Severity | Count | Release effect |
 |---|---:|---|
@@ -47,11 +47,11 @@ Two Medium, non-blocking hardening items remain: treat the anonymous reset route
 - **Mitigation:** Exact-origin response CORS, bounded JSON, pre-allocation rate limiting, 256-bit per-run bearer capabilities, hashed routing/storage, lease alarms, explicit cleanup, and the Durable Object call ceiling substantially constrain impact.
 - **False-positive notes:** Cloudflare rate limiting is intentionally permissive/eventually consistent and must not be described as strict global accounting. This is not a payment or data-integrity vulnerability in the synthetic fixture.
 
-### SEC-003 — Optional Social Neuron broker uses forgeable browser headers as its only caller gate
+### SEC-003 — Optional External Target broker uses forgeable browser headers as its only caller gate
 
 - **Rule ID:** SERVER-AUTHZ-001
 - **Severity:** Medium, conditional on enabling the broker
-- **Location:** `server/social-neuron-staging/broker.ts:50-135`, especially `server/social-neuron-staging/broker.ts:75-99` and `server/social-neuron-staging/broker.ts:238-251`
+- **Location:** `server/external-target-staging/broker.ts:50-135`, especially `server/external-target-staging/broker.ts:75-99` and `server/external-target-staging/broker.ts:238-251`
 - **Evidence:** The broker checks `Sec-Fetch-Site`, a custom header, `Origin`, and `Host`, then accepts a caller-supplied request ID. Those headers prevent ordinary cross-site browser requests but can be forged by a direct HTTP client. There is no authenticated user/session or durable request-rate limit at this boundary.
 - **Impact:** If deployed publicly with the server-side staging credential, an external caller could repeatedly trigger isolated canary work. Attestation prevents live-provider operation, but compute/staging quota and availability remain exposed.
 - **Fix:** Keep this integration disabled in the public static submission, as currently documented. Before any later enablement, add real caller authorization (for example a signed one-time nonce from an authenticated backend), durable idempotency, and an edge rate limit. Keep the existing environment/provider attestation as a separate safety control.
@@ -97,7 +97,7 @@ Two Medium, non-blocking hardening items remain: treat the anonymous reset route
 
 No security or privacy blocker prevents repository publication or deployment. Before the Devpost submit call:
 
-1. Confirm the optional Social Neuron broker remains absent/disabled in the deployed static artifact.
+1. Confirm the optional External Target broker remains absent/disabled in the deployed static artifact.
 2. Keep SEC-002 documented as residual synthetic-demo abuse risk and enable Cloudflare usage alerts for the judging window.
 
 Completed release checks: exact live security headers returned; a non-allowlisted origin received HTTP 403 with no CORS grant; the live frontend completed both lanes and final proof; Chrome 152 native WebMCP and 16/16 deployed browser journeys passed.
