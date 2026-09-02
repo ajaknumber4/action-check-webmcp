@@ -867,6 +867,34 @@ svg { flex: 0 0 auto; }
 .refund-proof-registration-registering .refund-proof-registration-light { animation: refund-proof-pulse 1s steps(2, jump-none) infinite; }
 .refund-proof-registration-failed { color: var(--red); }
 
+.refund-proof-simulation-badge {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin: 16px 0 0;
+  border: 1px solid var(--amber);
+  padding: 8px 12px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.refund-proof-simulation-badge > span:first-child {
+  flex: 0 0 auto;
+  border: 1px solid currentColor;
+  padding: 2px 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.refund-proof-simulation-badge-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .refund-proof-tool-strip {
   display: grid;
   grid-template-columns: 118px minmax(0, 1fr) auto;
@@ -1145,6 +1173,143 @@ svg { flex: 0 0 auto; }
 }
 
 .refund-proof-prompt-unavailable > span { color: var(--text-muted); }
+
+.refund-proof-simulation {
+  display: grid;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 20px;
+  background: rgb(7 11 13 / 0.9);
+}
+
+.refund-proof-simulation-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.refund-proof-simulation-controls p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.refund-proof-simulate-button-primary,
+.refund-proof-simulate-button-secondary {
+  display: inline-flex;
+  min-height: var(--touch-target);
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--mono);
+  white-space: nowrap;
+  transition: filter 120ms ease, transform 120ms ease, background 120ms ease;
+}
+
+.refund-proof-simulate-button-primary {
+  border: 1px solid var(--lime);
+  padding: 10px 18px;
+  background: var(--lime);
+  color: #111800;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.refund-proof-simulate-button-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+
+.refund-proof-simulate-button-secondary {
+  border: 1px solid var(--blue);
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--blue);
+  font-size: 0.75rem;
+}
+.refund-proof-simulate-button-secondary:hover:not(:disabled) { background: rgb(110 181 255 / 0.1); }
+
+.refund-proof-simulation-trace {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.refund-proof-simulation-trace li {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  background: rgb(10 16 20 / 0.72);
+}
+
+.refund-proof-simulation-tag {
+  border: 1px solid var(--amber);
+  padding: 2px 6px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.refund-proof-simulation-trace li > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.refund-proof-simulation-trace strong {
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.refund-proof-simulation-trace small {
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+.refund-proof-simulation-step-ok strong { color: var(--lime); }
+.refund-proof-simulation-step-running strong { color: var(--amber); }
+.refund-proof-simulation-step-error { border-color: var(--red); }
+.refund-proof-simulation-step-error strong { color: var(--red); }
+
+.refund-proof-simulation-error {
+  margin: 0;
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.refund-proof-simulation-footnote {
+  display: flex;
+  grid-column: 2 / -1;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 0;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.refund-proof-simulation-footnote > span:first-child {
+  flex: 0 0 auto;
+  border: 1px solid var(--amber);
+  padding: 2px 5px;
+  color: var(--amber);
+  font-size: 0.64rem;
+}
+.refund-proof-simulation-footnote-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.refund-proof-simulation-footnote code { color: var(--text-soft); }
 
 .refund-proof-path {
   display: grid;
@@ -1624,6 +1789,10 @@ svg { flex: 0 0 auto; }
   .refund-proof-approval-error { grid-column: auto; margin-top: -8px; }
   .refund-proof-lanes { grid-template-columns: 1fr; gap: 12px; padding: 0 14px 14px; }
   .refund-proof-result { margin: 0 14px 14px; }
+  .refund-proof-simulation { padding: 14px; }
+  .refund-proof-simulation-controls { flex-direction: column; align-items: stretch; }
+  .refund-proof-simulate-button-primary,
+  .refund-proof-simulate-button-secondary { width: 100%; }
 }
 
 @media (max-width: 560px) {
@@ -1645,6 +1814,9 @@ svg { flex: 0 0 auto; }
   .refund-proof-receipt-binding dl { grid-template-columns: 1fr; }
   .refund-proof-result-mark { width: 40px; height: 40px; }
   .refund-proof-disclosure { align-items: flex-start; }
+  .refund-proof-simulation-trace li { grid-template-columns: 1fr; }
+  .refund-proof-simulation-tag { justify-self: start; }
+  .refund-proof-simulation-footnote { grid-column: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

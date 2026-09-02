@@ -225,3 +225,21 @@ The implemented refund hero, not the older concept images, is the release refere
 | `docs/screenshots/action-check-live-proof.jpg` | Final deployed 2-versus-1 external proof |
 
 Final screenshots and video must be captured from the exact submitted build, contain fictional values only, show truthful native status, and pass a frame-by-frame public-boundary review.
+
+## Simulated-agent fallback path (2026-09-02, branch `feat/in-page-simulation`, worktree-local)
+
+This record covers only the in-page simulated-agent path added so a visitor without a WebMCP-capable browser can still see the four-step refund comparison proof. It was built and verified in an isolated `git worktree` against local `HEAD`; **nothing in this section has been merged to `main` or deployed.** All checks below ran on this machine only.
+
+| Check | Result |
+|---|---|
+| `npm run type-check` | Passed with no errors |
+| `npm run test:run` | Passed: 22 files / 144 tests (140 pre-existing + 4 new driver unit tests covering step ordering, the 2-vs-1 outcome read from the observed ledgers, badge/trial-ownership state, reentrant-run guarding, and the session-closed error path) |
+| `npm run test:e2e` (runs `npm run build` first via `pretest:e2e`) | Passed: 20/20 Playwright journeys (desktop Chromium + Pixel 7) against the local staging Worker started by the suite's own `webServer` (`wrangler dev` on `:8787`, the same real Worker code the native path uses, not the deployed instance) — includes the 2 new simulated-path specs (primary-launcher end-to-end run plus the secondary-option comparison affordance) on both browser projects, and all 18 pre-existing journeys unchanged |
+| `npm run check:public` | Passed: 141 text files scanned, 0 findings, 10 known binary files flagged for manual review (unchanged from the prior record) |
+| Simulated path hits the real staging Worker | Confirmed: the simulated driver calls the same `RefundComparisonSession` (`session.agent.stageComparison`, `session.target.issueRefund`, `session.agent.proveComparison`) the registered WebMCP tools call, which in this build is wired to `HttpRefundEffectTarget` against the local Worker — the observed 2-vs-1 outcome in the e2e run is a real ledger read, not a mock |
+| Honesty rails | Confirmed present in the e2e run: a `role="status"` badge reading "Simulated agent · no WebMCP client connected · tools called in-page" from the moment the driver owns a staged trial through completion; a 7-row `aria-label="Simulated agent event trace"` list with every row containing the literal text `simulated`; a footer sentence on the proof panel stating WebMCP discovery was not exercised |
+| Human approval remains a real click | Confirmed by construction and by the unit tests: the driver never calls `session.human.approve` itself — it only subscribes to `session.observe` and waits for an approval that the e2e test performs by clicking the existing "Approve exact staging refund" button |
+| 375px viewport | Confirmed no horizontal overflow (`document.documentElement.scrollWidth <= clientWidth + 1`) with the badge, launcher, and full 7-row trace all rendered, checked in the same e2e run that also verifies the pre-existing 375×667 first-viewport journey (`tests/e2e/workbench.spec.ts`) still passes unchanged |
+| Existing DOM/unit test compatibility | Confirmed: `simulation` is an optional `RefundProofHeroProps` field; the pre-existing 10-test `tests/refund-proof-hero.dom.test.tsx` suite (which never passes it) is unmodified and still passes, so the native-only rendering path is unchanged when the prop is absent |
+
+Not verified in this session: an installed-Chrome native WebMCP journey re-run alongside the simulated path (secondary-option rendering was verified against a minimal fake `document.modelContext`, not a real WebMCP browser); a deployed/production run of the simulated path; and a frame-by-frame public-boundary review of any new screenshot (none was captured for this feature).

@@ -7,7 +7,9 @@ import {
   type RefundComparisonToolRegistrationStatus,
 } from "../adapters/webmcp";
 import { useRefundComparisonView } from "../adapters/react/use-refund-comparison-view";
+import { useSimulatedRefundComparisonRunner } from "../adapters/react/use-simulated-refund-comparison-runner";
 import { useWorkbenchView } from "../adapters/react/use-workbench-view";
+import { createSimulatedRefundComparisonRunner } from "../adapters/simulated-agent/run-simulated-refund-comparison";
 import {
   BrowserSocialNeuronCanaryClient,
   type BrowserCanaryReport,
@@ -36,6 +38,7 @@ import {
 } from "./WorkbenchPage";
 import type {
   RefundProofRegistration,
+  RefundProofSimulation,
   RefundStagingTargetStatus,
 } from "./RefundProofHero";
 
@@ -59,6 +62,10 @@ export function App() {
     createRefundComparisonSession({ target: refundTarget.target }),
   );
   const refundComparisonView = useRefundComparisonView(refundComparison.observe);
+  const [simulationRunner] = useState(() =>
+    createSimulatedRefundComparisonRunner(refundComparison),
+  );
+  const simulationRunState = useSimulatedRefundComparisonRunner(simulationRunner);
   const [registration, setRegistration] = useState<RefundProofRegistration>(
     initialRegistrationDisplay,
   );
@@ -199,6 +206,21 @@ export function App() {
     },
     [refundComparison],
   );
+  const runSimulatedRefundComparison = useCallback(() => {
+    void simulationRunner.run();
+  }, [simulationRunner]);
+
+  const simulationOwnsCurrentTrial =
+    simulationRunState.ownedEpoch !== null &&
+    refundComparisonView.trial?.ref.epoch === simulationRunState.ownedEpoch;
+  const refundComparisonSimulation: RefundProofSimulation = {
+    availableNatively: registration.state === "ready",
+    active: simulationOwnsCurrentTrial,
+    status: simulationRunState.status,
+    steps: simulationRunState.steps,
+    error: simulationRunState.error,
+    onRun: runSimulatedRefundComparison,
+  };
 
   return (
     <WorkbenchPage
@@ -206,6 +228,7 @@ export function App() {
       refundComparison={refundComparisonView}
       registration={registration}
       stagingTarget={refundTarget.status}
+      refundComparisonSimulation={refundComparisonSimulation}
       socialNeuronCanary={socialNeuronCanary}
       onRunSocialNeuronCanary={runSocialNeuronCanary}
       onApproveRefundComparison={approveRefundComparison}

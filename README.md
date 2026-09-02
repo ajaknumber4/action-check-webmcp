@@ -38,7 +38,13 @@ For each lane, the first refund commits and the harness deliberately drops the s
 
 Action Check's registered WebMCP tools and its outcome plane have different jobs. `/v1/invoke` returns only an action claim; `/v1/observe` reads the target's durable effect state and returns UUID effect IDs plus an evidence digest. Each trial starts with `/v1/reset` proving a zero-effect baseline and ends with `/v1/cleanup`. The target is a separately deployable synthetic Cloudflare Worker backed by per-run SQLite Durable Objects. It is authoritative for this fixture only: it is not another team's registered WebMCP tool, no payment account is connected, and no money moves.
 
-The page has no button that stages, delivers, or proves this comparison. The agent must use the registered WebMCP tools; the only state-changing page control in that path is the human approval checkpoint. An always-visible **Agent tools** strip lists those exact tools and their truthful registration state. A phase-aware **Next** strip names who acts now, exposes a state-aware agent instruction only when needed, and explicitly tells the person to return to the agent after approval.
+In the native WebMCP path, the page has no button that stages, delivers, or proves this comparison. The agent must use the registered WebMCP tools; the only state-changing page control in that path is the human approval checkpoint. An always-visible **Agent tools** strip lists those exact tools and their truthful registration state. A phase-aware **Next** strip names who acts now, exposes a state-aware agent instruction only when needed, and explicitly tells the person to return to the agent after approval.
+
+### Without a WebMCP browser
+
+A visitor without a WebMCP-capable browser previously reached a dead end here: a guide telling them to open Chrome 149+ (WebMCP flag) or ChatGPT's browser, with no way to see the proof. The hero now offers a **"Run with a simulated agent"** button — primary when native WebMCP is unavailable, offered as a secondary comparison option when it is available — that drives the same `RefundComparisonSession` the registered tools call, using the exact same handler functions (`session.agent.stageComparison`, `session.target.issueRefund`, `session.agent.proveComparison`), directly in-page instead of through `document.modelContext`. It runs the identical documented sequence — stage, human approval, two retried delivery attempts per lane, prove — against the same real external staging Worker, so the 2-vs-1 outcome is genuine, not mocked.
+
+The only step this simulated driver does not perform itself is human approval: it stages the trial, then waits for the real **Approve exact staging refund** click already wired into the page. Three honesty rails make the mode impossible to mistake for a native WebMCP run: a persistent badge ("Simulated agent · no WebMCP client connected · tools called in-page"), an event trace where every simulated step is explicitly tagged `simulated`, and a footer note on the proof panel stating that WebMCP discovery was not exercised. See `src/adapters/simulated-agent/run-simulated-refund-comparison.ts` and `src/app/RefundProofHero.tsx`.
 
 ## Default WebMCP tools
 
@@ -72,6 +78,8 @@ Social Neuron is one reference case, not the product boundary.
 ## Why this fits WebMCP
 
 WebMCP lets a site expose typed actions that an agent can discover and invoke in the browser. Action Check uses that boundary for the target action itself, keeps approval outside the registered tool surface, shares the resulting state with the interface, and checks effect state separately from the target response.
+
+**How it differs from approval-gate entries.** Tools built around a staged change and a human approval stop a consequential write until a person says yes. Action Check starts where they stop: it assumes the write happened and proves what it did. It reads durable effect state through a separate observation endpoint, counts effects rather than responses, and surfaces the retry nobody approved. Approval is the precondition; proof of effect is the product.
 
 This entry proves the pattern with an Action Check-owned fixture. It does not yet connect to or automatically test a WebMCP tool registered by another team's site; that future adapter would need to map the external tool's invocation and authoritative outcome source into the same contract.
 

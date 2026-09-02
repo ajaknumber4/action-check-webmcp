@@ -28,3 +28,8 @@ test-results/
 .gstack/
 .vercel/
 .vercel
+
+# local video production (425+ files, absolute local paths) — never publish
+videos/
+# Local git worktrees used for isolated feature work.
+.worktrees/

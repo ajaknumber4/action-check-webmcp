@@ -15,6 +15,7 @@ import { CheckIcon, CrossIcon, DownloadIcon, PlayIcon } from "./icons";
 import {
   RefundProofHero,
   type RefundProofRegistration,
+  type RefundProofSimulation,
   type RefundStagingTargetStatus,
 } from "./RefundProofHero";
 
@@ -35,6 +36,7 @@ type WorkbenchPageProps = Readonly<{
   refundComparison: RefundComparisonView;
   registration: RefundProofRegistration;
   stagingTarget?: RefundStagingTargetStatus;
+  refundComparisonSimulation?: RefundProofSimulation;
   socialNeuronCanary: SocialNeuronCanaryDisplay;
   onRunSocialNeuronCanary(): Promise<void>;
   onApproveRefundComparison(expected: RefundTrialRef): Promise<void>;
@@ -64,6 +66,7 @@ export function WorkbenchPage({
   refundComparison,
   registration,
   stagingTarget,
+  refundComparisonSimulation,
   socialNeuronCanary,
   onRunSocialNeuronCanary,
   onApproveRefundComparison,
@@ -235,6 +238,7 @@ export function WorkbenchPage({
             view={refundComparison}
             registration={registration}
             stagingTarget={stagingTarget}
+            simulation={refundComparisonSimulation}
             onApprove={onApproveRefundComparison}
           />
         </section>

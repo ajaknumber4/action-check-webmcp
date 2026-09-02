@@ -10,12 +10,12 @@ The WebMCP Challenge submission period opened on **2026-08-25 at 11:00 Pacific T
 |---|---:|---|
 | Independent concept and implementation planning began | 2026-08-29 | Complete |
 | Local repository initialized | 2026-08-29T23:32:59Z | Complete; no remote is configured |
-| First implementation commit | 2026-08-30T01:43:56+01:00 | `4cbe2f2e1b13ba8bb54cbbf1fea20e6acdca3865` |
+| First implementation commit | 2026-08-30T01:43:56+01:00 | `4cbe2f2e1b13ba8bb54cbbf1fea20e6acdca3865` (private working history; the public repository holds snapshot commits and does not contain this SHA) |
 | Cross-industry effect-test pivot | 2026-08-30 | Four supporting synthetic cases implemented locally |
 | Native refund-comparison hero | 2026-08-31 | Three-tool WebMCP target, visible approval, and 2-versus-1 proof implemented locally |
 | External refund staging target | 2026-08-31 | Durable synthetic Worker, browser adapter, local end-to-end proof, and generated UUID effect evidence implemented and verified locally |
 | Public repository | Pending | No public remote is configured |
-| Public HTTPS deployment | Pending | No live URL exists |
+| Public HTTPS deployment | 2026-09-01 | Live at https://action-check-webmcp.vercel.app/ (Vercel); synthetic refund-staging Worker deployed alongside — see README |
 | Public demo video | Pending | No video URL exists |
 | Devpost submission | Pending | The registered project remains a draft |
 | Submission freeze | Pending | Record the exact submitted tag and timestamp |
@@ -75,7 +75,7 @@ An ExifTool review on 2026-08-31 found no populated EXIF, IPTC, or XMP fields in
 - WebMCP supplies the browser tool boundary, not the approval, idempotency, or postcondition guarantee.
 - The Social Neuron adapter is disconnected. No live staging or public-provider result is claimed.
 - Native registration tests do not substitute for agent discovery and invocation in the exact judging client.
-- No public repository, deployment, video, or submitted Devpost entry exists yet.
+- Public repository: https://github.com/ajaknumber4/action-check-webmcp (published as snapshot commits — the initial 2026-09-01 release and subsequent snapshots — while the private working history behind them is the commit table above). Deployment: live (see table). Video and Devpost submission: in progress on 2026-09-01; the Devpost project stays a draft until both are complete.
 
 ## Evidence to preserve
 

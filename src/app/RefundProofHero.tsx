@@ -18,10 +18,46 @@ export type RefundStagingTargetStatus = Readonly<{
   label: string;
 }>;
 
+export type RefundProofSimulationStepStatus = "pending" | "running" | "ok" | "error";
+
+export type RefundProofSimulationStep = Readonly<{
+  id: string;
+  label: string;
+  status: RefundProofSimulationStepStatus;
+  detail: string;
+}>;
+
+export type RefundProofSimulationRunStatus =
+  | "idle"
+  | "running"
+  | "awaiting_human_approval"
+  | "complete"
+  | "error";
+
+/**
+ * Drives the honesty rails for the in-page simulated-agent path: a visitor
+ * without a WebMCP-capable browser can still see the real four-step proof,
+ * with every simulated action clearly labelled as such. `active` tells this
+ * component whether the CURRENTLY DISPLAYED trial was produced by this
+ * simulated run (as opposed to a native WebMCP call, or an earlier
+ * simulated run that a later native call has since replaced).
+ */
+export type RefundProofSimulation = Readonly<{
+  /** True once native WebMCP registration is ready — offers this as a
+   *  secondary comparison option instead of the primary fallback. */
+  availableNatively: boolean;
+  active: boolean;
+  status: RefundProofSimulationRunStatus;
+  steps: readonly RefundProofSimulationStep[];
+  error: string;
+  onRun(): void;
+}>;
+
 export type RefundProofHeroProps = Readonly<{
   view: RefundComparisonView;
   registration: RefundProofRegistration;
   stagingTarget?: RefundStagingTargetStatus;
+  simulation?: RefundProofSimulation;
   onApprove(expected: RefundTrialRef): Promise<void>;
 }>;
 
@@ -48,6 +84,7 @@ export function RefundProofHero({
   view,
   registration,
   stagingTarget = DEFAULT_STAGING_TARGET,
+  simulation,
   onApprove,
 }: RefundProofHeroProps) {
   const [approving, setApproving] = useState(false);
@@ -76,7 +113,9 @@ export function RefundProofHero({
     stagingTarget,
   );
   const prompt = agentPrompt(view);
-  const guide = refundWorkflowGuide(view, registration, stagingTarget);
+  const simulationActive = simulation?.active ?? false;
+  const rawGuide = refundWorkflowGuide(view, registration, stagingTarget, simulationActive);
+  const guide = simulationActive ? withSimulatedActor(rawGuide) : rawGuide;
 
   useEffect(() => {
     setCopyState("idle");
@@ -150,6 +189,14 @@ export function RefundProofHero({
             ) : null}
           </span>
         </div>
+        {simulationActive ? (
+          <p className="refund-proof-simulation-badge" role="status">
+            <span aria-hidden="true">SIM</span>
+            <span className="refund-proof-simulation-badge-text">
+              {simulationBadgeCopy(registration)}
+            </span>
+          </p>
+        ) : null}
       </header>
 
       <section className="refund-proof-tool-strip" aria-labelledby="refund-proof-tools-title">
@@ -239,13 +286,16 @@ export function RefundProofHero({
               </span>
             ) : null}
           </div>
-        ) : guide.showPrompt ? (
+        ) : guide.showPrompt &&
+          !(simulationActive && stagingTarget.state === "configured") ? (
           <div className="refund-proof-prompt refund-proof-prompt-unavailable" aria-label="Agent prompt unavailable">
             <span>{registrationPresentation.promptTitle}</span>
             <p>{registrationPresentation.promptDescription}</p>
           </div>
         ) : null}
       </section>
+
+      {simulation ? <RefundSimulationPanel simulation={simulation} /> : null}
 
       <ol className="refund-proof-path" aria-label="Agent to outcome proof path">
         {PATH_STAGES.map((stage, index) => {
@@ -373,6 +423,16 @@ export function RefundProofHero({
             </div>
           </dl>
           <small>Evidence: {view.proof.evidenceSource}</small>
+          {simulationActive ? (
+            <p className="refund-proof-simulation-footnote">
+              <span aria-hidden="true">SIM</span>
+              <span className="refund-proof-simulation-footnote-text">
+                WebMCP discovery was not exercised in this run. A simulated agent called
+                stage_refund_comparison, issue_refund, and prove_refund_comparison directly
+                in-page — not through <code>document.modelContext</code>.
+              </span>
+            </p>
+          ) : null}
           <details className="refund-proof-receipt-binding">
             <summary>Show approval and effect binding</summary>
             <dl>
@@ -421,6 +481,7 @@ function refundWorkflowGuide(
   view: RefundComparisonView,
   registration: RefundProofRegistration,
   stagingTarget: RefundStagingTargetStatus,
+  simulationActive: boolean,
 ): RefundWorkflowGuide {
   const callsComplete = view.lanes.broken.attempts + view.lanes.protected.attempts;
   const allDeliveriesComplete =
@@ -496,7 +557,7 @@ function refundWorkflowGuide(
     };
   }
 
-  if (registration.state !== "ready") {
+  if (registration.state !== "ready" && !simulationActive) {
     return {
       accessibleName: "Workflow blocked",
       action: "enable-webmcp",
@@ -605,6 +666,23 @@ function refundWorkflowGuide(
     promptSummary: "Continue with the approved refund test and run both retry versions.",
     showPrompt: true,
     canCopyPrompt: true,
+  };
+}
+
+/**
+ * Relabels the "next actor" guide when a simulated agent — not a person
+ * copying a prompt to an external agent — is driving the remaining steps,
+ * and hides the copy-a-prompt affordance since there is nothing to copy:
+ * the simulated driver calls the session directly. Leaves the human
+ * approval step's guide untouched; that step is real regardless of mode.
+ */
+function withSimulatedActor(guide: RefundWorkflowGuide): RefundWorkflowGuide {
+  if (guide.actorLabel !== "Next — Agent") return guide;
+  return {
+    ...guide,
+    actorLabel: "Next — Simulated agent",
+    showPrompt: false,
+    canCopyPrompt: false,
   };
 }
 
@@ -837,4 +915,107 @@ function formatClaim(claim: RefundLaneView["lastClaim"]): string {
   if (claim === "created") return "Target claims a new refund";
   if (claim === "reused") return "Target claims the refund was reused";
   return "No response yet";
+}
+
+function simulationBadgeCopy(registration: RefundProofRegistration): string {
+  return registration.state === "ready"
+    ? "Simulated agent · WebMCP not used for this run · tools called in-page"
+    : "Simulated agent · no WebMCP client connected · tools called in-page";
+}
+
+function simulationLauncherLabel(status: RefundProofSimulationRunStatus): string {
+  switch (status) {
+    case "idle":
+      return "Run with a simulated agent";
+    case "running":
+      return "Simulated agent running…";
+    case "awaiting_human_approval":
+      return "Waiting for your approval…";
+    case "complete":
+      return "Run again";
+    case "error":
+      return "Retry simulated agent";
+    default:
+      return "Run with a simulated agent";
+  }
+}
+
+function simulationStepStatusLabel(status: RefundProofSimulationStepStatus): string {
+  switch (status) {
+    case "pending":
+      return "Not run";
+    case "running":
+      return "Running";
+    case "ok":
+      return "Done";
+    case "error":
+      return "Failed";
+    default:
+      return status;
+  }
+}
+
+function RefundSimulationPanel({
+  simulation,
+}: {
+  simulation: RefundProofSimulation;
+}) {
+  const busy =
+    simulation.status === "running" || simulation.status === "awaiting_human_approval";
+  const secondary = simulation.availableNatively;
+
+  return (
+    <section
+      className={`refund-proof-simulation ${secondary ? "refund-proof-simulation-secondary" : "refund-proof-simulation-primary"}`}
+      aria-label="Simulated agent path"
+    >
+      <div className="refund-proof-simulation-controls">
+        <p>
+          {secondary
+            ? "Compare: run the same four documented steps without native WebMCP."
+            : "No WebMCP client detected in this browser. Run the same four documented steps with an honestly-labelled in-page simulated agent instead."}
+        </p>
+        <button
+          type="button"
+          className={
+            secondary
+              ? "refund-proof-simulate-button-secondary"
+              : "refund-proof-simulate-button-primary"
+          }
+          disabled={busy}
+          onClick={simulation.onRun}
+        >
+          {simulationLauncherLabel(simulation.status)}
+        </button>
+      </div>
+
+      {simulation.status !== "idle" ? (
+        <ol className="refund-proof-simulation-trace" aria-label="Simulated agent event trace">
+          {simulation.steps.map((step) => (
+            <li key={step.id} className={`refund-proof-simulation-step-${step.status}`}>
+              <span className="refund-proof-simulation-tag" aria-hidden="true">
+                simulated
+              </span>
+              <span>
+                <strong>{step.label}</strong>
+                <small>
+                  {simulationStepStatusLabel(step.status)}
+                  {step.detail ? ` — ${step.detail}` : ""}
+                </small>
+              </span>
+              <span className="visually-hidden">
+                {`simulated step, ${simulationStepStatusLabel(step.status)}`}
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+
+      {simulation.status === "error" && simulation.error ? (
+        <p className="refund-proof-simulation-error" role="alert">
+          {simulation.error}
+        </p>
+      ) : null}
+    </section>
+  );
 }
