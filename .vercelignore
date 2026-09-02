@@ -31,3 +31,7 @@ test-results/
 
 # The staging target is deployed independently with Wrangler.
 workers/
+# Local video production and git worktrees must never be uploaded with a deployment.
+videos/
+.worktrees/
+
