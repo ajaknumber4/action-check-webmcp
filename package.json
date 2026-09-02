@@ -19,6 +19,7 @@
     "test:staging-target": "npm --prefix workers/refund-staging-target test",
     "check:staging-target": "npm --prefix workers/refund-staging-target run check",
     "check:public": "node scripts/check-public-boundary.mjs",
+    "cli:smoke": "node bin/cli-smoke.mjs",
     "ci:check": "npm run check:public && npm run type-check && npm run test:run && npm run check:staging-target && npm run build"
   },
   "dependencies": {

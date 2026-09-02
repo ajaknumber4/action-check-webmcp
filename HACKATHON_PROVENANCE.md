@@ -14,6 +14,7 @@ The WebMCP Challenge submission period opened on **2026-08-25 at 11:00 Pacific T
 | Cross-industry effect-test pivot | 2026-08-30 | Four supporting synthetic cases implemented locally |
 | Native refund-comparison hero | 2026-08-31 | Three-tool WebMCP target, visible approval, and 2-versus-1 proof implemented locally |
 | External refund staging target | 2026-08-31 | Durable synthetic Worker, browser adapter, local end-to-end proof, and generated UUID effect evidence implemented and verified locally |
+| Headless retry-proof CLI (v0) | 2026-09-02 | `bin/action-check` drives real Chrome with the WebMCP flag against a target page, performs the approval click, invokes `issue_refund` twice per lane, and cross-checks a separately supplied `observe()`; verified locally and against the public deployment |
 | Public repository | Pending | No public remote is configured |
 | Public HTTPS deployment | 2026-09-01 | Live at https://action-check-webmcp.vercel.app/ (Vercel); synthetic refund-staging Worker deployed alongside — see README |
 | Public demo video | Pending | No video URL exists |
@@ -37,6 +38,7 @@ All recorded implementation work falls after the submission period opened. Pendi
 - Four supporting deterministic fixtures for booking drift, duplicate refunds, cloud false success, and social-publish false success
 - A visible bug-sensitivity check and safe recovery path for each supporting fixture
 - A blocked-by-default External Target staging protocol, browser client, same-origin broker, and optional tool-registration gate
+- A headless `bin/action-check` CLI (v0) that runs the same comparison from outside the page in real Chrome with the WebMCP flag and cross-checks tool claims against a caller-supplied independent `observe()`; refund fixture only
 - Browser interface, accessibility behavior, automated tests, public-boundary controls, and release documentation
 
 ## Independence and data origin

@@ -18,6 +18,13 @@ export default defineConfig({
       },
       {
         test: {
+          name: "cli",
+          environment: "node",
+          include: ["bin/**/*.test.mjs"],
+        },
+      },
+      {
+        test: {
           name: "dom",
           environment: "jsdom",
           include: ["tests/**/*.dom.test.tsx"],

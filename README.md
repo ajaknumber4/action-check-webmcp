@@ -122,6 +122,10 @@ Open the URL printed by Vite. On loopback, the browser adapter uses `http://127.
 
 For a production frontend build, set `VITE_REFUND_STAGING_TARGET_URL` to the exact deployed HTTPS Worker origin and configure the Worker to allow the frontend's exact origin. `wrangler.jsonc` contains separate local and production environments; use `npm run deploy:dry-run:production` before `npm run deploy:production` in the Worker package.
 
+## Run the check from outside (CLI v0)
+
+`node bin/action-check.mjs run --url <page> --tool issue_refund --observe <module.mjs>` drives real Chrome 149+ (launched with `--enable-features=WebMCP`; the bundled Playwright Chromium does not implement native WebMCP), performs the human approval click itself, invokes `issue_refund` twice per lane with one request ID, and cross-checks the tool's own claims against an independently observed effect count. Your `observe()` module must read a store the tool never writes back into its own response, or the check proves nothing. v0 supports exactly the refund-comparison fixture (see `examples/observe-refund-staging.mjs`). Proof JSON goes to stdout, PASS/FAIL to the exit code.
+
 ## Verify
 
 ```sh
