@@ -8,6 +8,19 @@ A site can expose a refund, a booking or a publish action to agents through WebM
 
 ![Action Check live WebMCP discovery](./docs/screenshots/action-check-live-discovery.jpg)
 
+## Judges start here — 60 seconds
+
+**The one thing that is different:** every other way of testing an agent tool tests a page you built yourself. Action Check has been pointed at pages we do not own — seven of Google's own public WebMCP demos, twelve recorded runs — and five of those runs caught a real bug. The proof JSON for each is committed in [`docs/evidence/external-targets-2026-09-03/`](./docs/evidence/external-targets-2026-09-03/).
+
+| Want to | Do this | Takes |
+|---|---|---|
+| See it work with no setup | Open the [live demo](https://action-check-webmcp.vercel.app/) and press **Run with a simulated agent**. No Chrome flag, no agent needed. The page labels every simulated step as simulated | 30s |
+| See real WebMCP tool calls | Same page in Chrome 149+ with `chrome://flags/#enable-webmcp-testing`, driven by ChatGPT desktop or any WebMCP agent. Press **Copy agent instruction** | 2 min |
+| See the bugs we found in Google's demos | The **Run it on any page** section, or [the table below](#any-pages-tool-external-target-mode) | 1 min |
+| Point it at your own site | Same section: fill in a URL, tool name and JSON, and the page writes your `observe()` module and the command to run it | 5 min |
+
+**What a PASS means:** a declared rule held for that one trial. Not that a business action succeeded, and not a security guarantee. Every payment, effect and request id in the demo is synthetic; no payment account is connected and no money moves.
+
 ## What it catches
 
 - A retry that repeats an effect which already committed.
@@ -80,9 +93,11 @@ node bin/action-check.mjs run \
 
 Your `observe()` has to read a store the tool never writes into its own reply. If it just repeats the reply, the check fails; that negative control is unit-tested.
 
+**You do not have to write either file from scratch.** The **Run it on any page** section of the [live demo](https://action-check-webmcp.vercel.app/#any-page) has a builder: type your target URL, the registered tool name, its JSON input and a mode, and it emits a starter `observe()` module and the exact command that uses it, both with a copy button. It runs nothing itself — a page can only see tools on its own `document.modelContext`, never another origin's, which is precisely why the check has to drive a real Chrome from outside.
+
 ### Any page's tool (external-target mode)
 
-Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema through `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict from the two observations alone. `observe(ctx)` gets the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API. It never sees the tool's reply.
+Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema through `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict from those observations — in `once` mode, compared against whether the reply claimed success or refused. `observe(ctx)` gets the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API. It never sees the tool's reply.
 
 Runs recorded on 3 September against seven of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos) in Chrome 152. Action Check does not own those pages. The proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`. Twelve runs, five caught a bug.
 

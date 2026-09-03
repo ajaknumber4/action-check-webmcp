@@ -7,6 +7,7 @@ import {
   EXTERNAL_TARGET_RUNS_DATE,
   REPO_URL,
 } from "./external-target-runs";
+import { CheckBuilder } from "./CheckBuilder";
 
 /**
  * "Run it on any page": the command-line mode that points the same check at
@@ -24,8 +25,9 @@ export function ExternalTargetRuns() {
           <h2 id="external-runs-title">Run it on any page</h2>
           <p>
             The same check, pointed at a page Action Check does not own. Your{" "}
-            <code>observe()</code> reads that page’s own state before and after the call.
-            The verdict never comes from the tool’s reply.
+            <code>observe()</code> reads that page’s own state before and after the call
+            and is never handed the tool’s reply, so it cannot echo the claim. The verdict
+            is the gap between what the tool claimed and what actually changed.
           </p>
         </div>
         <pre className="external-runs-command" aria-label="Example command" tabIndex={0}>
@@ -73,6 +75,8 @@ export function ExternalTargetRuns() {
         </tbody>
       </table>
       </div>
+
+      <CheckBuilder />
 
       <footer className="external-runs-foot">
         <p>

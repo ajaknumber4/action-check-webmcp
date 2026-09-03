@@ -33,3 +33,6 @@ test-results/
 videos/
 # Local git worktrees used for isolated feature work.
 .worktrees/
+
+# Hackathon strategy notes: internal only, never ship in the public snapshot.
+docs/audits/*judge-pass-and-win-odds.md

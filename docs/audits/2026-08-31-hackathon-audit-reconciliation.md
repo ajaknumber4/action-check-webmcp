@@ -24,11 +24,11 @@ The local build is credible but not releasable yet. It still lacks a frozen publ
 | No remote, deployment, or release commit | **Open release blocker** | Obtain explicit public-release approval, freeze the exact commit, rerun scans and tests, create the public repository, and deploy the same build. |
 | No demo video | **Open release blocker** | Record the deployed three-tool flow in under three minutes after the judging-client gate passes. |
 | Stale screenshots | **Open release blocker** | Replace the historical images with final desktop, mobile, approval, and 2/2-versus-2/1 proof captures from the deployed build. |
-| FrameGuard might be a sibling entry | **No supporting evidence** | Public and local evidence do not link FrameGuard to the entrant, Action Check, or Codex. Treat it as an independent adjacent entry. See `2026-08-31-frameguard-competitor-followup.md`. |
+| Another entry might be a sibling of this one | **No supporting evidence** | Checked and dismissed. Other entries are treated as independent work. The working note naming a specific project was removed rather than published. |
 
 ## Product distinction
 
-FrameGuard reviews a proposed visual edit before it is applied. Action Check invokes a registered mutating WebMCP action, injects a retry failure, and checks the resulting effect state with a negative control. The distinction is outcome verification after an action, not generic human approval before one.
+Some adjacent entries review a proposed change before it is applied. Action Check invokes a registered mutating WebMCP action, injects a retry failure, and checks the resulting effect state with a negative control. The distinction is outcome verification after an action, not generic human approval before one.
 
 ## Release order
 

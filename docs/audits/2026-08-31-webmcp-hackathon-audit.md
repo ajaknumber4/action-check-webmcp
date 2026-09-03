@@ -43,7 +43,7 @@ The adapter binds **`document.modelContext.registerTool` exclusively** (`src/ada
 1. **WebMCP Leverage** — Strong on mechanics: six imperative tools with strict schemas, cancellation forwarding, bounded outputs, fail-closed optional seventh tool. One structural weakness the repo's own alignment audit already flags: the four mutating "tools under test" (`confirm_booking`, `issue_refund`, `deploy_service`, `publish_post`) are **fixture labels, not registered WebMCP tools** — no mutating WebMCP tool is actually invoked and independently checked end-to-end. **Highest-value remaining code change:** register those four synthetic actions as real WebMCP tools too, so an agent literally calls `issue_refund` over WebMCP and Action Check proves the effect. That upgrades the story from "agent drives a test harness" to "agent calls a mutating WebMCP tool and the harness catches the injected fault," and it makes the demo self-evidently non-trivial. Also make the tool surface *visible* (see UI notes).
 2. **Execution** — Strong if deployed: deterministic one-click suite, PASS/FAIL from replayed state, negative control ("Run broken version" proves the test can catch the bug). Tests green.
 3. **Potential Impact** — Credible but must be argued in the description: every team shipping consequential WebMCP actions needs effect tests; cite the trust-gap evidence above.
-4. **Creativity & Ambition** — Differentiated: nothing in the showcase window tests effects. Closest neighbor is FrameGuard (human-in-the-loop visual-edit review, YouTube Aug 26) — see open question below.
+4. **Creativity & Ambition** — Differentiated: nothing in the showcase window tests effects. The closest neighbours are human-in-the-loop review tools, which approve a proposed change rather than verify a completed one.
 
 **Fit risk to manage:** the brief says "apps people and their agents can use together" and all five reference demos (3D modeling, collaborative writing, crossword, itinerary, Duckboard) are consumer-collaborative. Action Check's answer is its caller-separation design — *the agent runs diagnostics and replay; only the human can approve the fix*. Lead the description and video with that human+agent loop, not with "test harness."
 
@@ -69,7 +69,6 @@ Minor polish (only if time remains): the lime-on-black accent system is distinct
 
 ## Open question for the entrant
 
-**Is FrameGuard yours?** (YouTube, Aug 26, two videos, same proposal-before-mutation framing, explicitly a WebMCP Challenge build.) If yes: two sibling entries split demo/verification time in the final 72h — decide which gets the push. If no: it is the nearest competitor; differentiate in the description (FrameGuard reviews visual edits; Action Check proves effect contracts with injected faults and a negative control).
 
 ## Ranked action plan (72h)
 

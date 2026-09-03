@@ -41,7 +41,7 @@ All recorded implementation work falls after the submission period opened. Pendi
 - A visible bug-sensitivity check and safe recovery path for each supporting fixture
 - A blocked-by-default External Target staging protocol, browser client, same-origin broker, and optional tool-registration gate
 - A headless `bin/action-check` CLI (v0) that runs the same comparison from outside the page in real Chrome with the WebMCP flag and cross-checks tool claims against a caller-supplied independent `observe()`
-- An external-target mode for that CLI (v0.1): any page's registered WebMCP tool, called once or twice with identical input, verdict taken only from before/after observations of that page's own state; demonstrated on a page Action Check does not own
+- An external-target mode for that CLI (v0.1): any page's registered WebMCP tool, called once or twice with identical input, verdict from before/after observations of that page's own state, compared in once mode against the reply's claim; demonstrated on a page Action Check does not own
 - Browser interface, accessibility behavior, automated tests, public-boundary controls, and release documentation
 
 ## Independence and data origin
