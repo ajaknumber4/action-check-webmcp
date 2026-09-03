@@ -1,0 +1,65 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/ticket-booking/",
+  "tool": "select_showtime",
+  "input": {
+    "movie_id": "nope",
+    "date": "2026-09-03",
+    "time": "10:00 AM"
+  },
+  "mode": "once",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "query_content",
+      "select_showtime",
+      "update_location"
+    ],
+    "description": "Selects a movie and a specific showtime to initiate the checkout process.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"movie_id\":{\"type\":\"string\",\"description\":\"The ID of the movie to select.\"},\"date\":{\"type\":\"string\",\"description\":\"The date of the show in YYYY-MM-DD format (e.g., '2026-09-03').\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"time\":{\"type\":\"string\",\"description\":\"The start time of the show in 12-hour format with AM/PM (e.g., '8:30 PM').\",\"pattern\":\"^[1-12]:[0-5][0-9] (AM|PM)$\"},\"tickets\":{\"type\":\"number\",\"description\":\"Number of tickets.\",\"default\":1}},\"required\":[\"movie_id\",\"date\",\"time\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #checkout-section without class 'hidden'",
+      "phase": "before",
+      "input": {
+        "movie_id": "nope",
+        "date": "2026-09-03",
+        "time": "10:00 AM"
+      },
+      "checkoutVisible": false,
+      "checkoutTime": "",
+      "hash": ""
+    }
+  },
+  "calls": [
+    {
+      "status": "error",
+      "message": "Invalid movie_id value (nope)"
+    }
+  ],
+  "after": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #checkout-section without class 'hidden'",
+      "phase": "after",
+      "input": {
+        "movie_id": "nope",
+        "date": "2026-09-03",
+        "time": "10:00 AM"
+      },
+      "checkoutVisible": false,
+      "checkoutTime": "",
+      "hash": ""
+    }
+  },
+  "verdict": {
+    "status": "PASS",
+    "code": "HONEST_REFUSAL",
+    "reason": "the tool reported failure and nothing changed (observed 0 -> 0)",
+    "effectDelta": 0
+  },
+  "generatedAt": "2026-09-03T13:01:07.106Z"
+}

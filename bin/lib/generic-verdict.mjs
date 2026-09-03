@@ -42,6 +42,7 @@ export function claimsSuccess(result) {
   if (result.ok === false) return false;
   if (result.isError === true) return false;
   if (result.success === false) return false;
+  if (typeof result.status === "string" && /^(error|failed|failure)$/i.test(result.status.trim())) return false;
   if (result.error && result.ok !== true) return false;
   // MCP-style content payloads ({ content: [{ type: "text", text }] }) carry
   // the claim in their text.

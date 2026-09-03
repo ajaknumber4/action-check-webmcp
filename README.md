@@ -84,7 +84,7 @@ Your `observe()` has to read a store the tool never writes into its own reply. I
 
 Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema through `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict from the two observations alone. `observe(ctx)` gets the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API. It never sees the tool's reply.
 
-Runs recorded on 3 September against three of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos) in Chrome 152. Action Check does not own those pages. The proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`.
+Runs recorded on 3 September against seven of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos) in Chrome 152. Action Check does not own those pages. The proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`. Twelve runs, five caught a bug.
 
 | Demo and tool | Mode | What `observe()` read | Verdict |
 |---|---|---|---|
@@ -94,6 +94,14 @@ Runs recorded on 3 September against three of Google's public [WebMCP demos](htt
 | zaMaker `add_topping {"topping":"🍍","count":1}` | retry | rendered 🍍 toppings, 0 to 2 | **FAIL `DUPLICATE_EFFECT`** |
 | zaMaker `remove_topping {"topping":"🍍"}` on an empty pizza | once | toppings, 0 to 0 | PASS `HONEST_REFUSAL`. The reply says "Topping 🍍 not found" and nothing changed |
 | zaMaker `set_pizza_size {"size":"Large"}` | retry | the rendered size label | PASS `IDEMPOTENT` |
+| Ticket booking `select_showtime` with a real movie id, on the movie page | once | the checkout section shown on the page, stays hidden | **FAIL `FALSE_SUCCESS`**. The reply says "You can now proceed to checkout"; the page re-renders and hides the checkout again. A person clicking the same showtime does not hit this path |
+| Ticket booking `select_showtime {"movie_id":"nope",…}` | once | the checkout section, 0 to 0 | PASS `HONEST_REFUSAL`. The reply is `{"status":"error"}` and nothing changed |
+| Ticket booking `update_location {"city":"Paris"}` | retry | the rendered location label | PASS `IDEMPOTENT` |
+| Luxe Leather `add_to_cart {"variations":[{"color":"Brown","quantity":1}]}` | retry | line quantities on the site's own cart page, 0 to 2 | **FAIL `DUPLICATE_EFFECT`**. The header badge still says 1; the cart page says 2 and the subtotal doubled |
+| Analytics dashboard `query` (count by status, horizontal bars) | retry | the three chart controls on the page | PASS `IDEMPOTENT` |
+| Explainer `cancelBooking {"confirmationId":"BK-NOPE00"}` | once | the confirmed-booking banner, 0 to 0 | PASS `HONEST_REFUSAL` |
+
+Six more runs from the same afternoon were recorded and then set aside because the verdict could not be trusted: three where the demo's reply or its self-aborting tool confused the claim heuristic, and three where a count-based `observe()` could not see the failure that mattered (a retry that minted a second confirmation id under the same banner, a cart count hard-coded to 1). They are listed in the 3 September audit, not on the page. Lesson: a verdict is only as good as what `observe()` reads.
 
 ```sh
 node bin/action-check.mjs run \

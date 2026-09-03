@@ -1,0 +1,65 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/ticket-booking/#movie/101",
+  "tool": "select_showtime",
+  "input": {
+    "movie_id": "101",
+    "date": "2026-09-04",
+    "time": "10:00 AM"
+  },
+  "mode": "once",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "query_content",
+      "select_showtime",
+      "update_location"
+    ],
+    "description": "Selects a movie and a specific showtime to initiate the checkout process.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"movie_id\":{\"type\":\"string\",\"description\":\"The ID of the movie to select.\"},\"date\":{\"type\":\"string\",\"description\":\"The date of the show in YYYY-MM-DD format (e.g., '2026-09-03').\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"time\":{\"type\":\"string\",\"description\":\"The start time of the show in 12-hour format with AM/PM (e.g., '8:30 PM').\",\"pattern\":\"^[1-12]:[0-5][0-9] (AM|PM)$\"},\"tickets\":{\"type\":\"number\",\"description\":\"Number of tickets.\",\"default\":1}},\"required\":[\"movie_id\",\"date\",\"time\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #checkout-section without class 'hidden'",
+      "phase": "before",
+      "input": {
+        "movie_id": "101",
+        "date": "2026-09-04",
+        "time": "10:00 AM"
+      },
+      "checkoutVisible": false,
+      "checkoutTime": "",
+      "hash": "#movie/101"
+    }
+  },
+  "calls": [
+    {
+      "status": "success",
+      "message": "Selected showtime 10:00 AM on 2026-09-04 for \"Vengeance\" movie. You can now proceed to checkout."
+    }
+  ],
+  "after": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #checkout-section without class 'hidden'",
+      "phase": "after",
+      "input": {
+        "movie_id": "101",
+        "date": "2026-09-04",
+        "time": "10:00 AM"
+      },
+      "checkoutVisible": false,
+      "checkoutTime": "Fri, Sep 4 at 10:00 AM",
+      "hash": "#movie/101"
+    }
+  },
+  "verdict": {
+    "status": "FAIL",
+    "code": "FALSE_SUCCESS",
+    "reason": "the tool claimed success but no effect appeared (observed 0 -> 0)",
+    "effectDelta": 0
+  },
+  "generatedAt": "2026-09-03T12:55:44.777Z"
+}

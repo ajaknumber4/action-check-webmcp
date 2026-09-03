@@ -198,7 +198,7 @@ describe("RefundProofHero", () => {
 
     expect(
       screen.getByRole("status", {
-        name: "External staging target: Not configured",
+        name: "Staging ledger: Not configured",
       }),
     ).toBeVisible();
     expect(screen.getByRole("region", { name: "Workflow blocked" })).toHaveAttribute(
@@ -357,7 +357,7 @@ describe("RefundProofHero", () => {
       "Unavailable in this browser",
     );
     const tools = within(screen.getByRole("region", { name: "Agent tools" }));
-    expect(tools.getByText("Available on this page", { exact: true })).toBeVisible();
+    expect(tools.getByText("Not registered in this browser", { exact: true })).toBeVisible();
     expect(tools.getByText("Unavailable", { exact: true })).toBeVisible();
     expect(tools.getByText("0 registered tools", { exact: true })).toBeVisible();
     expect(screen.queryByLabelText("Agent prompt")).not.toBeInTheDocument();

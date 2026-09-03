@@ -12,6 +12,8 @@ import type {
   RefundTrialRef,
 } from "../refund-comparison";
 import { CheckIcon, CrossIcon, DownloadIcon, PlayIcon } from "./icons";
+import { ExternalTargetRuns } from "./ExternalTargetRuns";
+import { REPO_URL } from "./external-target-runs";
 import {
   RefundProofHero,
   type RefundProofRegistration,
@@ -215,11 +217,17 @@ export function WorkbenchPage({
             <small>WebMCP effect tests</small>
           </span>
         </div>
+        <nav className="app-nav" aria-label="Sections">
+          <a href="#refund-demo">Refund demo</a>
+          <a href="#any-page">Any page</a>
+          <a href="#ui-examples">UI examples</a>
+          <a className="app-nav-repo" href={REPO_URL} rel="noreferrer">GitHub</a>
+        </nav>
       </header>
 
       <main className="runner-shell">
-        <section className="runner-hero" aria-labelledby="page-title">
-          <h1 id="page-title" className="runner-title">Test what WebMCP actions actually change.</h1>
+        <div className="runner-hero" id="refund-demo">
+          <p className="runner-title">Test what WebMCP actions actually change.</p>
 
           <RefundProofHero
             view={refundComparison}
@@ -228,11 +236,9 @@ export function WorkbenchPage({
             simulation={refundComparisonSimulation}
             onApprove={onApproveRefundComparison}
           />
+        </div>
 
-          <footer className="runner-intro">
-            <small>External synthetic staging demo · no payment account connected · no real money moves</small>
-          </footer>
-        </section>
+        <ExternalTargetRuns />
 
         <ScenarioSuite
           view={view}
@@ -244,8 +250,6 @@ export function WorkbenchPage({
         />
 
         <section className="runner-details" aria-label="Supporting effect tests">
-          <TestPath status={currentStatus} />
-
           <div className="selected-test-heading">
             <div>
               <span>{profile.industry} / <code>{profile.toolName}</code></span>
@@ -421,17 +425,16 @@ function ScenarioSuite({
   onRunAll(): Promise<void>;
 }) {
   return (
-    <div className="test-suite-block">
-      <div className="test-suite-toolbar">
-        <span className="contract-count">{view.scenarioOptions.length} synthetic contracts</span>
+    <div className="test-suite-block" id="ui-examples">
+      <aside className="test-suite" aria-labelledby="suite-title">
+      <header>
+        <div className="test-suite-heading">
+          <h2 id="suite-title">Test suite</h2>
+          <small>Simulated examples</small>
+        </div>
         <button className="run-all-button" type="button" disabled={disabled} onClick={() => void onRunAll()}>
           <PlayIcon /> {busyAction === "run-all" ? "Running 4 UI examples…" : "Run 4 UI examples"}
         </button>
-      </div>
-      <aside className="test-suite" aria-labelledby="suite-title">
-      <header>
-        <h2 id="suite-title">Test suite</h2>
-        <small>Simulated examples</small>
       </header>
       <ol>
         {view.scenarioOptions.map((option, index) => {
@@ -470,18 +473,6 @@ function TestStatusIcon({ status }: { status: TestStatus }) {
     <span className={"suite-status suite-status-" + status} role="img" aria-label={label}>
       {status === "passed" ? <CheckIcon /> : status === "failed" ? <CrossIcon /> : status === "caught" ? "!" : status === "running" ? "···" : "○"}
     </span>
-  );
-}
-
-function TestPath({ status }: { status: TestStatus }) {
-  const labels = ["Define contract", "Inject fault", "Run tool", "Check state"];
-  return (
-    <ol className="test-path" aria-label="Effect test stages">
-      {labels.map((label, index) => {
-        const state = index < 2 ? "complete" : status === "passed" || status === "caught" ? "complete" : status === "failed" && index === 3 ? "failed" : status === "running" && index === 2 ? "current" : "pending";
-        return <li key={label} className={"path-" + state} aria-current={state === "current" ? "step" : undefined}><span>{index + 1}</span><strong>{label}</strong></li>;
-      })}
-    </ol>
   );
 }
 
@@ -534,7 +525,6 @@ function FaultPanel({
       <p>{profile.fault.description}</p>
       <dl>
         <div><dt>Tool under test</dt><dd><code>{profile.toolName}</code></dd></div>
-        <div><dt>Pass when</dt><dd>{profile.passingBehavior}</dd></div>
       </dl>
       <div className="fault-actions">
         <button className="run-test-button" type="button" disabled={disabled} onClick={() => void onRun()}>

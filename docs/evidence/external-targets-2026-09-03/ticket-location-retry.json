@@ -1,0 +1,59 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/ticket-booking/",
+  "tool": "update_location",
+  "input": {
+    "city": "Paris"
+  },
+  "mode": "retry",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "query_content",
+      "select_showtime",
+      "update_location"
+    ],
+    "description": "Updates the user's location.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\",\"description\":\"The city to set as the user's location. (e.g. Montpelier, Paris, New York)\"}},\"required\":[\"city\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #location-text equals requested city",
+      "phase": "before",
+      "wanted": "Paris",
+      "rendered": "Select Location",
+      "movieCount": "(62)",
+      "urlSearch": ""
+    }
+  },
+  "calls": [
+    {
+      "status": "success",
+      "message": "Location updated to Paris"
+    },
+    {
+      "status": "success",
+      "message": "Location updated to Paris"
+    }
+  ],
+  "after": {
+    "effectCount": 1,
+    "evidence": {
+      "source": "rendered DOM: #location-text equals requested city",
+      "phase": "after",
+      "wanted": "Paris",
+      "rendered": "Paris",
+      "movieCount": "(32)",
+      "urlSearch": "?city=Paris"
+    }
+  },
+  "verdict": {
+    "status": "PASS",
+    "code": "IDEMPOTENT",
+    "reason": "two identical calls left exactly one new effect (observed 0 -> 1); second call claimed success and reused the effect",
+    "effectDelta": 1
+  },
+  "generatedAt": "2026-09-03T12:55:34.877Z"
+}

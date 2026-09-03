@@ -113,7 +113,6 @@ test("keeps audited mobile labels readable and controls touch-sized", async ({
   ).toEqual({ overflow: "visible", textOverflow: "clip", whiteSpace: "normal" });
 
   const readableSelectors = [
-    ".runner-intro small",
     ".refund-proof-kicker",
     ".refund-proof-registration small",
     ".refund-proof-registration strong",
@@ -182,15 +181,20 @@ test("shows four synthetic effect contracts with no production effects", async (
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Test what WebMCP actions actually change.",
+      name: "Can one retry accidentally refund twice?",
     }),
   ).toBeVisible();
+  await expect(page.getByText("Staging sandbox only.", { exact: true })).toBeVisible();
   await expect(
     page.getByText(
       "External synthetic staging demo · no payment account connected · no real money moves",
       { exact: true },
     ),
-  ).toBeVisible();
+  ).toHaveCount(0);
+
+  const anyPage = page.getByRole("region", { name: "Run it on any page" });
+  await expect(anyPage.getByRole("row")).toHaveCount(13);
+  await expect(anyPage.getByRole("link", { name: "Source and CLI on GitHub" })).toBeVisible();
 
   const agentTools = page.getByRole("region", { name: "Agent tools" });
   await expect(agentTools.getByRole("listitem")).toHaveCount(3);
@@ -201,7 +205,7 @@ test("shows four synthetic effect contracts with no production effects", async (
 
   const suite = page.getByRole("complementary", { name: "Test suite" });
   await expect(suite.getByText("Simulated examples", { exact: true })).toBeVisible();
-  await expect(suite.getByRole("button")).toHaveCount(4);
+  await expect(suite.getByRole("list").getByRole("button")).toHaveCount(4);
   await expect(
     suite.getByRole("button", { name: /Booking changed after approval/ }),
   ).toBeVisible();

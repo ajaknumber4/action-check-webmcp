@@ -63,7 +63,7 @@ export type RefundProofHeroProps = Readonly<{
 
 const DEFAULT_STAGING_TARGET: RefundStagingTargetStatus = Object.freeze({
   state: "configured",
-  label: "External staging configured",
+  label: "Configured",
 });
 
 const FIXED_TRIAL = {
@@ -186,7 +186,7 @@ export function RefundProofHero({
       <header className="refund-proof-mast">
         <div className="refund-proof-title-block">
           <span className="refund-proof-kicker">{registrationPresentation.kicker}</span>
-          <h2 id="refund-proof-title">Can one retry accidentally refund twice?</h2>
+          <h1 id="refund-proof-title">Can one retry accidentally refund twice?</h1>
           <p>{registrationPresentation.description}</p>
         </div>
         <div
@@ -218,7 +218,11 @@ export function RefundProofHero({
       <section className="refund-proof-tool-strip" aria-labelledby="refund-proof-tools-title">
         <div className="refund-proof-tool-strip-label">
           <strong id="refund-proof-tools-title">Agent tools</strong>
-          <small>Available on this page</small>
+          <small>
+            {registration.state === "ready"
+              ? "Registered by this page"
+              : "Not registered in this browser"}
+          </small>
         </div>
         <ul>
           {REFUND_COMPARISON_TOOL_NAMES.map((toolName) => (
@@ -239,10 +243,10 @@ export function RefundProofHero({
           <div
             className={`refund-proof-target-state refund-proof-target-state-${stagingTarget.state}`}
             role="status"
-            aria-label={`External staging target: ${stagingTarget.label}`}
+            aria-label={`Staging ledger: ${stagingTarget.label}`}
           >
             <span aria-hidden="true" />
-            <small>External target</small>
+            <small>Staging ledger</small>
             <strong>{stagingTarget.label}</strong>
           </div>
         </div>
@@ -260,7 +264,7 @@ export function RefundProofHero({
           <strong>{guide.actorLabel}</strong>
         </div>
         <div className="refund-proof-guide-message">
-          <h3>{guide.title}</h3>
+          <h2>{guide.title}</h2>
           <p>{guide.description}</p>
           <small>{guide.secondary}</small>
         </div>
@@ -351,9 +355,9 @@ export function RefundProofHero({
       >
         <div className="refund-proof-approval-heading">
           <span className="refund-proof-panel-label">Human checkpoint</span>
-          <h3 id="refund-proof-approval-title">
+          <h2 id="refund-proof-approval-title">
             {trial ? "Exact staging refund fixture" : "Waiting for the agent to reset a staging trial"}
-          </h3>
+          </h2>
           <p>
             {trial
               ? "Approval is bound to these values. If anything changes, it has to be approved again."
@@ -442,7 +446,7 @@ export function RefundProofHero({
           <span className="refund-proof-result-mark" aria-hidden="true">✓</span>
           <div>
             <span className="refund-proof-panel-label">Checker validated</span>
-            <h3 id="refund-proof-result-title">Caught the unsafe duplicate. Protected stayed single.</h3>
+            <h2 id="refund-proof-result-title">Caught the unsafe duplicate. Protected stayed single.</h2>
           </div>
           <dl>
             <div className="refund-proof-result-broken">
@@ -868,9 +872,9 @@ function RefundLanePanel({
       <header>
         <div>
           <span className="refund-proof-panel-label">{isBroken ? "Known-bad staging target" : "Protected staging target"}</span>
-          <h3 id={`refund-proof-lane-${lane}-title`}>
+          <h2 id={`refund-proof-lane-${lane}-title`}>
             {isBroken ? "Unsafe retry" : "Protected retry"}
-          </h3>
+          </h2>
         </div>
         <span className="refund-proof-lane-status">{status}</span>
       </header>

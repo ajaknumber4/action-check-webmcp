@@ -193,10 +193,12 @@ svg { flex: 0 0 auto; }
   min-height: 52px;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 18px;
+  gap: 14px;
+  padding: 8px 8px 8px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
 }
+.test-suite-heading { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .test-suite h2 {
   margin: 0;
   font-family: var(--mono);
@@ -793,7 +795,7 @@ svg { flex: 0 0 auto; }
   text-transform: uppercase;
 }
 
-.refund-proof-title-block h2 {
+.refund-proof-title-block h1 {
   max-width: 760px;
   margin: 10px 0 0;
   font-family: var(--display);
@@ -974,6 +976,16 @@ svg { flex: 0 0 auto; }
 
 .refund-proof-tool-state-ready { color: var(--lime); }
 .refund-proof-tool-state-ready > span { background: currentColor; }
+/* When ready, the mast already says "Native WebMCP ready"; keep the status
+   for assistive tech but show only the registered count here. */
+.refund-proof-tool-state-ready > strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
 .refund-proof-tool-state-registering { color: var(--amber); }
 .refund-proof-tool-state-failed { color: var(--red); }
 
@@ -1056,7 +1068,7 @@ svg { flex: 0 0 auto; }
   padding: 14px 18px;
 }
 
-.refund-proof-guide-message h3 {
+.refund-proof-guide-message h2 {
   margin: 0;
   font-family: var(--display);
   font-size: 1.6rem;
@@ -1223,11 +1235,12 @@ svg { flex: 0 0 auto; }
 .refund-proof-simulate-button-primary:hover:not(:disabled) { background: #262b2f; }
 
 .refund-proof-simulate-button-secondary {
-  border: 1px solid var(--line);
-  padding: 8px 14px;
-  background: transparent;
+  border: 1px solid var(--text);
+  padding: 10px 18px;
+  background: var(--surface);
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 .refund-proof-simulate-button-secondary:hover:not(:disabled) { background: var(--panel); }
 
@@ -1399,7 +1412,7 @@ svg { flex: 0 0 auto; }
   background: var(--amber-soft);
 }
 
-.refund-proof-approval-heading h3 {
+.refund-proof-approval-heading h2 {
   margin: 4px 0 0;
   font-family: var(--display);
   font-size: 1.55rem;
@@ -1565,7 +1578,7 @@ svg { flex: 0 0 auto; }
 }
 
 .refund-proof-lane-broken .refund-proof-panel-label { color: var(--red); }
-.refund-proof-lane h3 {
+.refund-proof-lane h2 {
   margin: 3px 0 0;
   font-family: var(--display);
   font-size: 1.4rem;
@@ -1677,7 +1690,7 @@ svg { flex: 0 0 auto; }
   font-size: 1.2rem;
 }
 
-.refund-proof-result h3 {
+.refund-proof-result h2 {
   margin: 3px 0 0;
   font-family: var(--display);
   font-size: 1.9rem;
@@ -1799,7 +1812,7 @@ svg { flex: 0 0 auto; }
   .runner-intro p { line-height: 1.32; }
   .runner-intro small { margin-top: 4px; line-height: 1.25; }
   .refund-proof-mast { padding: 12px 14px 10px; gap: 8px; }
-  .refund-proof-title-block h2 { font-size: 1.45rem; line-height: 1.06; margin-top: 6px; }
+  .refund-proof-title-block h1 { font-size: 1.45rem; line-height: 1.06; margin-top: 6px; }
   .refund-proof-title-block p { font-size: 0.8rem; margin-top: 6px; line-height: 1.35; }
   .refund-proof-registration { padding: 7px 9px; }
   .refund-proof-tool-strip { grid-template-columns: 1fr; }
@@ -1823,4 +1836,159 @@ svg { flex: 0 0 auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .refund-proof-registration-registering .refund-proof-registration-light { animation: none; }
+}
+
+/* Header section navigation */
+.app-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.app-nav a {
+  display: inline-flex;
+  min-height: var(--touch-target);
+  align-items: center;
+  padding: 0 10px;
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.app-nav a:hover { color: var(--text); text-decoration: underline; }
+.app-nav a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.app-nav-repo { margin-left: 6px; border-left: 1px solid var(--line); color: var(--text); }
+
+/* Run it on any page: the external-target record */
+.external-runs {
+  margin: 28px 0 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--text);
+  background: var(--surface);
+}
+.external-runs-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  gap: 24px;
+  align-items: end;
+  padding: 24px 26px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.external-runs-intro h2 {
+  margin: 10px 0 0;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}
+.external-runs-intro p {
+  max-width: 560px;
+  margin: 12px 0 0;
+  color: var(--text-soft);
+  font-size: 0.98rem;
+  line-height: 1.48;
+}
+.external-runs-intro p code { font-size: 0.85em; }
+.external-runs-command {
+  margin: 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+.external-runs-command code { font-family: inherit; white-space: pre-wrap; overflow-wrap: anywhere; }
+.external-runs-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.external-runs-table caption {
+  padding: 10px 26px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  caption-side: top;
+}
+.external-runs-table th,
+.external-runs-table td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.external-runs-table thead th {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.external-runs-table th:first-child,
+.external-runs-table td:first-child { padding-left: 26px; }
+.external-runs-table th:last-child,
+.external-runs-table td:last-child { padding-right: 26px; }
+.external-runs-table tbody th { font-weight: 600; white-space: nowrap; }
+.external-runs-table tbody th a { color: var(--text); }
+.external-runs-table code { display: block; font-size: 0.78rem; overflow-wrap: anywhere; }
+.external-run-input { color: var(--text-muted); }
+.external-run-delta { display: block; font-family: var(--mono); font-size: 1rem; font-weight: 500; white-space: nowrap; }
+.external-runs-table td small { display: block; margin-top: 2px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.35; }
+.external-runs-table td strong { display: block; font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.04em; }
+.external-run-fail td strong { color: var(--red); }
+.external-run-pass td strong { color: var(--lime); }
+.external-runs-foot { padding: 14px 26px 12px; border-top: 1px solid var(--line); background: var(--panel); }
+.external-runs-foot p { max-width: 860px; margin: 0; color: var(--text-muted); font-size: 0.8125rem; line-height: 1.45; }
+.external-runs-links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 4px; }
+.external-runs-links a {
+  display: inline-flex;
+  min-height: var(--touch-target);
+  align-items: center;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 820px) {
+  .app-header { flex-wrap: wrap; padding-bottom: 4px; }
+  .app-nav a { padding: 0 8px; }
+  .external-runs-head { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+  .external-runs-scroll { overflow-x: auto; }
+  .external-runs-table caption { display: block; padding: 10px 20px; }
+  .external-runs-table th:first-child,
+  .external-runs-table td:first-child { padding-left: 20px; }
+  .external-runs-foot { padding: 12px 20px 10px; }
+}
+
+@media (max-width: 560px) {
+  .app-nav a { padding: 0 6px; font-size: 0.7rem; }
+  .external-runs { margin-top: 20px; }
+  .external-runs-head { padding: 14px; }
+  .external-runs-table th,
+  .external-runs-table td { padding: 10px 10px; }
+  .external-runs-table th:first-child,
+  .external-runs-table td:first-child { padding-left: 14px; }
+  /* Instruction text reads before the button that copies it. */
+  .refund-proof-prompt { grid-template-columns: 1fr; }
+  .refund-proof-prompt > span { border-right: 0; }
+  .refund-proof-prompt-body { grid-column: 1; border-top: 0; }
+  .refund-proof-copy-button {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+    border-left: 0;
+    border-bottom: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* Verdict codes stay on one line; demo links get a full touch target. */
+.external-runs-table td:last-child { white-space: nowrap; }
+.external-runs-table td:last-child code { overflow-wrap: normal; }
+.external-runs-table tbody th a {
+  display: inline-flex;
+  min-height: var(--touch-target);
+  align-items: center;
+  margin: -12px 0;
 }

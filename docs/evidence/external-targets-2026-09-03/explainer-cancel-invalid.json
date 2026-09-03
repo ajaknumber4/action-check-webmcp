@@ -1,0 +1,60 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/explainer/",
+  "tool": "cancelBooking",
+  "input": {
+    "confirmationId": "BK-NOPE00"
+  },
+  "mode": "once",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "bookSlot",
+      "cancelBooking",
+      "getAvailability"
+    ],
+    "description": "Cancel a previously confirmed booking by its confirmation id.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"confirmationId\":{\"type\":\"string\",\"description\":\"Confirmation id returned by bookSlot, e.g. 'BK-AB12CD'.\"}},\"required\":[\"confirmationId\"]}",
+    "annotations": {
+      "readOnlyHint": false,
+      "untrustedContentHint": false
+    }
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #widget-with .w-success.is-visible (confirmed booking banner)",
+      "phase": "before",
+      "input": {
+        "confirmationId": "BK-NOPE00"
+      },
+      "bannerText": "",
+      "confirmationId": null
+    }
+  },
+  "calls": [
+    {
+      "ok": false,
+      "error": "Confirmation id invalid."
+    }
+  ],
+  "after": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #widget-with .w-success.is-visible (confirmed booking banner)",
+      "phase": "after",
+      "input": {
+        "confirmationId": "BK-NOPE00"
+      },
+      "bannerText": "",
+      "confirmationId": null
+    }
+  },
+  "verdict": {
+    "status": "PASS",
+    "code": "HONEST_REFUSAL",
+    "reason": "the tool reported failure and nothing changed (observed 0 -> 0)",
+    "effectDelta": 0
+  },
+  "generatedAt": "2026-09-03T12:55:12.296Z"
+}

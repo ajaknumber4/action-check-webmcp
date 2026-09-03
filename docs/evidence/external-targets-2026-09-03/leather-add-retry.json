@@ -1,0 +1,89 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/leather-bag/#/product/signature-satchel",
+  "tool": "add_to_cart",
+  "input": {
+    "variations": [
+      {
+        "color": "Brown",
+        "quantity": 1
+      }
+    ]
+  },
+  "mode": "retry",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "add_to_cart",
+      "check_return_policy",
+      "search_store",
+      "view_product"
+    ],
+    "description": "Add item to the shopping cart with chosen variations (color and quantity)",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"variations\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"color\":{\"type\":\"string\"},\"quantity\":{\"type\":\"number\"}},\"required\":[\"color\"],\"additionalProperties\":false}}},\"required\":[],\"additionalProperties\":false}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM on the #/cart route: sum of line quantities (header .cart-badge recorded alongside)",
+      "phase": "before",
+      "input": {
+        "variations": [
+          {
+            "color": "Brown",
+            "quantity": 1
+          }
+        ]
+      },
+      "badgeText": null,
+      "lineQuantities": [],
+      "subtotal": null
+    }
+  },
+  "calls": [
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "Form submitted successfully."
+        }
+      ]
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "Form submitted successfully."
+        }
+      ]
+    }
+  ],
+  "after": {
+    "effectCount": 2,
+    "evidence": {
+      "source": "rendered DOM on the #/cart route: sum of line quantities (header .cart-badge recorded alongside)",
+      "phase": "after",
+      "input": {
+        "variations": [
+          {
+            "color": "Brown",
+            "quantity": 1
+          }
+        ]
+      },
+      "badgeText": "1",
+      "lineQuantities": [
+        2
+      ],
+      "subtotal": "2,500.00"
+    }
+  },
+  "verdict": {
+    "status": "FAIL",
+    "code": "DUPLICATE_EFFECT",
+    "reason": "two identical calls created 2 new effects (observed 0 -> 2); the tool is not idempotent on retry",
+    "effectDelta": 2
+  },
+  "generatedAt": "2026-09-03T12:57:18.493Z"
+}

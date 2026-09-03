@@ -83,14 +83,19 @@ describe("Action Check effect runner", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Test what WebMCP actions actually change.",
+        level: 1,
+        name: "Can one retry accidentally refund twice?",
       }),
     ).toBeVisible();
-    expect(screen.getByText("4 synthetic contracts")).toBeVisible();
+    expect(screen.getByText("Test what WebMCP actions actually change.")).toBeVisible();
 
     const hero = screen.getByRole("region", {
-      name: "Test what WebMCP actions actually change.",
+      name: "Can one retry accidentally refund twice?",
     });
+    const anyPage = screen.getByRole("region", { name: "Run it on any page" });
+    expect(
+      hero.compareDocumentPosition(anyPage) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     const supporting = screen.getByRole("region", {
       name: "Supporting effect tests",
     });
@@ -138,7 +143,7 @@ describe("Action Check effect runner", () => {
       },
     ] as const;
 
-    expect(suite.getAllByRole("button")).toHaveLength(4);
+    expect(within(suite.getByRole("list")).getAllByRole("button")).toHaveLength(4);
 
     for (const choice of choices) {
       const selector = suite.getByRole("button", {
