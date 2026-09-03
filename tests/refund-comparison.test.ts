@@ -213,3 +213,45 @@ describe("refund comparison session", () => {
     });
   });
 });
+
+describe("refund comparison recovery hints", () => {
+  const input = {
+    lane: "broken" as const,
+    paymentId: "pay-204",
+    amountMinor: 4200,
+    currency: "USD",
+    requestId: "refund-request-204",
+  };
+
+  it("tells the agent to stage first when no trial exists", async () => {
+    const session = createRefundComparisonSession();
+
+    const denied = await session.target.issueRefund(input);
+
+    expect(denied).toMatchObject({
+      ok: false,
+      error: { code: "HUMAN_APPROVAL_REQUIRED" },
+    });
+    if (denied.ok) throw new Error("expected a failure outcome");
+    expect(denied.error.nextAction).toContain("stage_refund_comparison");
+  });
+
+  it("tells the agent to wait for the person's approval once a trial is staged", async () => {
+    const session = createRefundComparisonSession();
+    await session.agent.stageComparison();
+
+    const denied = await session.target.issueRefund(input);
+
+    expect(denied).toMatchObject({
+      ok: false,
+      error: { code: "HUMAN_APPROVAL_REQUIRED" },
+    });
+    if (denied.ok) throw new Error("expected a failure outcome");
+    expect(denied.error.nextAction).toMatch(/approv/i);
+    // The hint must not read as an instruction to stage again: an agent that
+    // re-stages here replaces the trial and discards the pending approval.
+    expect(denied.error.nextAction).not.toMatch(/\bstage\b/i);
+    expect(denied.error.nextAction).not.toContain("stage_refund_comparison");
+    expect(session.observe.getSnapshot().trial?.approvalStatus).toBe("pending");
+  });
+});

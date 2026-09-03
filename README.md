@@ -2,7 +2,7 @@
 
 **A browser test lab for consequential WebMCP actions.**
 
-[Live demo](https://action-check-webmcp.vercel.app/) · [Devpost submission draft](./devpost-submission.md) · MIT licensed
+[Live demo](https://action-check-webmcp.vercel.app/) · [Devpost description](./devpost-submission.md) · MIT licensed
 
 Action Check demonstrates a problem that a valid tool schema cannot solve on its own: an action can return success while creating the wrong external effect. Its main demo registers an Action Check-owned `issue_refund` WebMCP fixture, makes an agent deliver the same synthetic refund twice, asks a person to approve the exact trial, and then checks a separately served staging ledger instead of trusting the tool response.
 
@@ -30,6 +30,8 @@ The judge path is a broken-versus-protected refund comparison:
 | 2 | You | Review the payment, amount, currency, and request ID, then approve those exact values in the page |
 | 3 | Agent | Calls `issue_refund` twice for the broken lane and twice for the protected lane |
 | 4 | Agent + Action Check | The agent calls `prove_refund_comparison`; Action Check reads both staging lanes through the separate observation endpoint and renders the proof |
+
+**Example prompt** (the page's **Copy agent instruction** button produces the exact text): "Call stage_refund_comparison with {}. Wait until I approve the exact trial shown on the page. Call issue_refund twice for lane \"broken\" using the approved payment, amount, currency and request ID; the first call is expected to return PROVIDER_ACK_LOST_AFTER_COMMIT, retry once with identical arguments. Do the same for lane \"protected\". Then call prove_refund_comparison with {}."
 
 For each lane, the first refund commits and the harness deliberately drops the synthetic provider acknowledgement. The agent receives a bounded error and retries with the same request ID:
 
@@ -135,7 +137,7 @@ npm run test:e2e
 npm run test:native-webmcp
 ```
 
-Release results are recorded in [docs/QA_EVIDENCE.md](./docs/QA_EVIDENCE.md). The stable production URL passed the ChatGPT in-app-browser journey, 16/16 desktop/mobile browser journeys, and 1/1 installed-Chrome native WebMCP journey. Unit fakes do not replace that live evidence.
+Release results are recorded in [docs/QA_EVIDENCE.md](./docs/QA_EVIDENCE.md). On the 3 September build the stable production URL passed 20/20 desktop/mobile browser journeys, 1/1 installed-Chrome 152 native WebMCP journey, the headless CLI check (2 effects versus 1), and 36 off-script agent-recovery probes with zero console errors. The ChatGPT in-app-browser journey passed on the 1 September build. Unit fakes do not replace that live evidence.
 
 ## Truth and safety boundary
 

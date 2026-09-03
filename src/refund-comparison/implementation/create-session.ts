@@ -231,12 +231,20 @@ export function createRefundComparisonSession(
   ): Promise<RefundComparisonOutcome> {
     const blocked = preflight("issue_refund", options);
     if (blocked) return blocked;
-    if (state.trial === null || state.trial.approvalStatus !== "approved") {
+    if (state.trial === null) {
       return failure(
         "issue_refund",
         "HUMAN_APPROVAL_REQUIRED",
-        "The staging refund target is blocked until a person approves the exact trial.",
-        "Stage the comparison and use the visible approval control.",
+        "No staging trial exists yet, so the refund target is blocked.",
+        "Call stage_refund_comparison first; a person then approves the staged values on the page.",
+      );
+    }
+    if (state.trial.approvalStatus !== "approved") {
+      return failure(
+        "issue_refund",
+        "HUMAN_APPROVAL_REQUIRED",
+        "The staged trial is waiting for a person to approve it on the page.",
+        "Wait for the person to press Approve exact staging refund on the page, then retry this exact call; re-staging would discard the pending approval.",
       );
     }
     if (!matchesTrial(input, state.trial)) {

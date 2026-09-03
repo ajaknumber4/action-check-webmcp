@@ -15,7 +15,8 @@ The WebMCP Challenge submission period opened on **2026-08-25 at 11:00 Pacific T
 | Native refund-comparison hero | 2026-08-31 | Three-tool WebMCP target, visible approval, and 2-versus-1 proof implemented locally |
 | External refund staging target | 2026-08-31 | Durable synthetic Worker, browser adapter, local end-to-end proof, and generated UUID effect evidence implemented and verified locally |
 | Headless retry-proof CLI (v0) | 2026-09-02 | `bin/action-check` drives real Chrome with the WebMCP flag against a target page, performs the approval click, invokes `issue_refund` twice per lane, and cross-checks a separately supplied `observe()`; verified locally and against the public deployment |
-| Public repository | Pending | No public remote is configured |
+| Light lab-report interface, agent-recovery message fixes, favicon | 2026-09-03 | Deployed to the stable URL at 12:19 BST and verified live: 20/20 browser journeys, 1/1 native Chrome 152 WebMCP journey, CLI PASS, 36 off-script probes fail-closed, zero console errors |
+| Public repository | 2026-09-01 | `github.com/ajaknumber4/action-check-webmcp`, published as snapshot commits (first snapshot `c0dc36e`); the private working history is not pushed |
 | Public HTTPS deployment | 2026-09-01 | Live at https://action-check-webmcp.vercel.app/ (Vercel); synthetic refund-staging Worker deployed alongside — see README |
 | Public demo video | Pending | No video URL exists |
 | Devpost submission | Pending | The registered project remains a draft |
@@ -53,7 +54,7 @@ AI-assisted research, design, implementation, and review are part of the recorde
 
 ## Visual asset provenance
 
-Seven binary visual assets currently sit outside the source-code text scan:
+Eleven binary visual assets currently sit outside the source-code text scan:
 
 | Asset | Origin | Release use |
 |---|---|---|
@@ -64,11 +65,12 @@ Seven binary visual assets currently sit outside the source-code text scan:
 | `docs/screenshots/action-assurance-false-success-mobile.jpg` | Direct local mobile browser capture of a synthetic build | Historical pre-refund-hero screenshot; recapture before submission |
 | `docs/screenshots/workbench-receipt-ready.png` | Direct local browser capture of the earlier OAuth build | Historical only; the file contains JPEG data despite its `.png` suffix |
 | `docs/screenshots/external-staging-refund-proof.png` | Direct local browser capture of the integrated app-to-Worker proof on 2026-08-31 | Current local QA evidence; recapture from the deployed release before submission |
-| `docs/screenshots/action-check-live-discovery.jpg` | Direct in-app browser capture of the deployed release on 2026-09-01 | Final discovery/tool-surface evidence |
-| `docs/screenshots/action-check-live-approval.jpg` | Direct in-app browser capture of the deployed release on 2026-09-01 | Final human-approval evidence |
-| `docs/screenshots/action-check-live-proof.jpg` | Direct in-app browser capture of the deployed release on 2026-09-01 | Final 2-versus-1 outcome evidence |
+| `docs/screenshots/action-check-live-discovery.jpg` | Direct Chrome 152 (WebMCP flag, Playwright) capture of the deployed release on 2026-09-03; replaced the 2026-09-01 in-app-browser capture when the light interface shipped | Final discovery/tool-surface evidence |
+| `docs/screenshots/action-check-live-approval.jpg` | Direct Chrome 152 (WebMCP flag, Playwright) capture of the deployed release on 2026-09-03; replaced the 2026-09-01 capture | Final human-approval evidence |
+| `docs/screenshots/action-check-live-proof.jpg` | Direct Chrome 152 (WebMCP flag, Playwright) capture of the deployed release on 2026-09-03; replaced the 2026-09-01 capture | Final 2-versus-1 outcome evidence |
+| `docs/screenshots/action-check-live-simulated-fallback.jpg` | Direct Chrome 152 (no WebMCP flag, Playwright) capture of the deployed release on 2026-09-03 | Final fallback-state evidence for browsers without WebMCP |
 
-An ExifTool review on 2026-08-31 found no populated EXIF, IPTC, or XMP fields in these seven files. A visual review found no people, real customer records, or third-party logos. Final screenshots and every video frame still require a fresh manual review from the exact submitted build.
+An ExifTool review on 2026-08-31 found no populated EXIF, IPTC, or XMP fields in the seven files then present. The four `action-check-live-*.jpg` captures from the 2026-09-03 build were reviewed the same way on 2026-09-03: only File, JFIF, and an sRGB ICC colour profile are present; no EXIF, IPTC, or XMP fields. A visual review found no people, real customer records, or third-party logos. Every video frame still requires a fresh manual review from the exact submitted build.
 
 ## Claims boundary
 

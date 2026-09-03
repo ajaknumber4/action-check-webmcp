@@ -1,12 +1,28 @@
 # Verification and fidelity evidence
 
-**Evidence date:** 2026-09-01
+**Evidence date:** 2026-09-03 (supplements the 2026-09-01 record below)
 
 **Current product:** Action Check
 
 **Release status:** the external refund staging target and frontend are publicly deployed. The stable URL passed an interactive ChatGPT in-app-browser WebMCP journey, 16/16 deployed desktop/mobile browser journeys, and 1/1 installed-Chrome native WebMCP journey. Release scans and repository publication pass. The public narrated video, participant-specific Devpost fields, and explicit final submit remain open.
 
-## Public release record
+## 3 September release record
+
+The light lab-report interface, the agent-recovery message fixes, and the favicon shipped to the stable URL at 12:19 BST on 2026-09-03 (Vercel deployment `usm8jkt5f`). The Worker was not redeployed. Verified against the live URL immediately afterwards in Google Chrome 152.0.7977.65 with `--enable-features=WebMCP`:
+
+| Check | Result |
+|---|---|
+| `npx vitest run` | 23 files / 153 tests passed (three new agent-recovery message tests) |
+| `tsc -b`, `check:public`, Vite production build, Worker check (11 tests, dry-run) | Passed |
+| `PLAYWRIGHT_BASE_URL=<live> playwright test` | 20/20 desktop and Pixel 7 journeys, including Axe and keyboard gates |
+| `PLAYWRIGHT_BASE_URL=<live> playwright test --config playwright.native.config.ts` | 1/1 native discovery-and-invocation journey |
+| `node bin/action-check.mjs run --url <live> … --target-base-url <worker>` | PASS, exit 0: broken 2 calls / 2 effects, protected 2 calls / 1 effect |
+| Off-script agent probes (36 calls: prove before staging, issue before approval, double stage, wrong and malformed arguments, third call, prove early, re-stage mid-flight, non-JSON input) | Every call fail-closed with `code`, `message`, `nextAction`; see `docs/audits/2026-09-03-chrome-docs-conformance-and-agent-probes.md` |
+| Console on the live page | Zero errors or warnings (the earlier `/favicon.ico` 404 is gone) |
+| Release captures | `action-check-live-discovery.jpg`, `action-check-live-approval.jpg`, `action-check-live-proof.jpg`, `action-check-live-simulated-fallback.jpg` captured from the deployed 3 September build at 1280×720 |
+| ChatGPT in-app browser | Not re-run on this build; last passed on the 1 September build |
+
+## Public release record (1 September)
 
 | Check | Result |
 |---|---|
@@ -220,9 +236,10 @@ The implemented refund hero, not the older concept images, is the release refere
 | `docs/screenshots/action-assurance-false-success-mobile.jpg` | Historical pre-hero local capture; replace before submission |
 | `docs/screenshots/workbench-receipt-ready.png` | Historical OAuth capture containing JPEG data; exclude from final submission |
 | `docs/screenshots/external-staging-refund-proof.png` | Current local integrated proof capture; valid QA evidence, but recapture from the deployed release before submission |
-| `docs/screenshots/action-check-live-discovery.jpg` | Final deployed 16:9 discovery and three-tool surface |
-| `docs/screenshots/action-check-live-approval.jpg` | Final deployed human-approval checkpoint |
-| `docs/screenshots/action-check-live-proof.jpg` | Final deployed 2-versus-1 external proof |
+| `docs/screenshots/action-check-live-discovery.jpg` | Final deployed 16:9 discovery and three-tool surface (3 September build) |
+| `docs/screenshots/action-check-live-approval.jpg` | Final deployed human-approval checkpoint (3 September build) |
+| `docs/screenshots/action-check-live-proof.jpg` | Final deployed 2-versus-1 external proof (3 September build) |
+| `docs/screenshots/action-check-live-simulated-fallback.jpg` | Final deployed fallback state in a browser without WebMCP, offering the simulated agent (3 September build) |
 
 Final screenshots and video must be captured from the exact submitted build, contain fictional values only, show truthful native status, and pass a frame-by-frame public-boundary review.
 

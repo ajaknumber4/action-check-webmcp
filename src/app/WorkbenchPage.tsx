@@ -215,24 +215,11 @@ export function WorkbenchPage({
             <small>WebMCP effect tests</small>
           </span>
         </div>
-        <div className="header-actions">
-          <span className="contract-count">{view.scenarioOptions.length} synthetic contracts</span>
-          <button className="run-all-button" type="button" disabled={busyAction !== null} onClick={() => void runAll()}>
-            <PlayIcon /> {busyAction === "run-all" ? "Running 4 UI examples…" : "Run 4 UI examples"}
-          </button>
-        </div>
       </header>
 
       <main className="runner-shell">
         <section className="runner-hero" aria-labelledby="page-title">
-          <header className="runner-intro">
-            <h1 id="page-title">Test what WebMCP actions actually change.</h1>
-            <p>
-              Action Check is a browser test lab for developers and QA teams building agent
-              actions. It catches duplicate effects, stale approvals, and false success before production.
-            </p>
-            <small>External synthetic staging demo · no payment account connected · no real money moves</small>
-          </header>
+          <h1 id="page-title" className="runner-title">Test what WebMCP actions actually change.</h1>
 
           <RefundProofHero
             view={refundComparison}
@@ -241,9 +228,24 @@ export function WorkbenchPage({
             simulation={refundComparisonSimulation}
             onApprove={onApproveRefundComparison}
           />
+
+          <footer className="runner-intro">
+            <p>
+              Action Check is a browser test lab for developers and QA teams building agent
+              actions. It catches duplicate effects, stale approvals, and false success before production.
+            </p>
+            <small>External synthetic staging demo · no payment account connected · no real money moves</small>
+          </footer>
         </section>
 
-        <ScenarioSuite view={view} results={runResults} disabled={busyAction !== null} onSelect={switchScenario} />
+        <ScenarioSuite
+          view={view}
+          results={runResults}
+          disabled={busyAction !== null}
+          onSelect={switchScenario}
+          busyAction={busyAction}
+          onRunAll={runAll}
+        />
 
         <section className="runner-details" aria-label="Supporting effect tests">
           <TestPath status={currentStatus} />
@@ -412,15 +414,29 @@ function ScenarioSuite({
   results,
   disabled,
   onSelect,
+  busyAction,
+  onRunAll,
 }: {
   view: WorkbenchView;
   results: Record<string, TestStatus>;
   disabled: boolean;
   onSelect(caseId: string): Promise<void>;
+  busyAction: string | null;
+  onRunAll(): Promise<void>;
 }) {
   return (
-    <aside className="test-suite" aria-labelledby="suite-title">
-      <header><h2 id="suite-title">Test suite</h2><small>Simulated examples</small></header>
+    <div className="test-suite-block">
+      <div className="test-suite-toolbar">
+        <span className="contract-count">{view.scenarioOptions.length} synthetic contracts</span>
+        <button className="run-all-button" type="button" disabled={disabled} onClick={() => void onRunAll()}>
+          <PlayIcon /> {busyAction === "run-all" ? "Running 4 UI examples…" : "Run 4 UI examples"}
+        </button>
+      </div>
+      <aside className="test-suite" aria-labelledby="suite-title">
+      <header>
+        <h2 id="suite-title">Test suite</h2>
+        <small>Simulated examples</small>
+      </header>
       <ol>
         {view.scenarioOptions.map((option, index) => {
           const status = results[option.id] ?? "idle";
@@ -442,7 +458,8 @@ function ScenarioSuite({
         })}
       </ol>
       <p>These supporting fixtures use page controls, not registered agent tools.</p>
-    </aside>
+      </aside>
+    </div>
   );
 }
 

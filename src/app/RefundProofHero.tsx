@@ -116,6 +116,22 @@ export function RefundProofHero({
   const simulationActive = simulation?.active ?? false;
   const rawGuide = refundWorkflowGuide(view, registration, stagingTarget, simulationActive);
   const guide = simulationActive ? withSimulatedActor(rawGuide) : rawGuide;
+  // One card is "current" per step: once approval is granted the approval
+  // checkpoint collapses to a bound-values summary and the retry lanes take
+  // the prominent, display-size-count treatment described in the mockups.
+  const pastApproval =
+    view.phase === "approved" ||
+    view.phase === "running" ||
+    view.phase === "proof_ready";
+  const simulationIsCompareOption = (simulation?.availableNatively ?? false) === true;
+  // First-viewport rule: only the current step's card is visually present.
+  // The approval checkpoint is required (by "explains the native webmcp
+  // boundary while idle", asserting 4x "Not staged") to still exist in the
+  // DOM while idle, so it collapses to a hairline instead of unmounting —
+  // never display:none, so it stays in the accessibility tree.
+  const approvalCollapsed = view.phase === "idle";
+  // The agent-instruction row is never collapsed: it holds a 44px control
+  // (gate review P2-1) and is the affordance for every agent-driven step.
 
   useEffect(() => {
     setCopyState("idle");
@@ -295,7 +311,9 @@ export function RefundProofHero({
         ) : null}
       </section>
 
-      {simulation ? <RefundSimulationPanel simulation={simulation} /> : null}
+      {simulation && !simulationIsCompareOption ? (
+        <RefundSimulationPanel simulation={simulation} />
+      ) : null}
 
       <ol className="refund-proof-path" aria-label="Agent to outcome proof path">
         {PATH_STAGES.map((stage, index) => {
@@ -326,7 +344,7 @@ export function RefundProofHero({
       </ol>
 
       <section
-        className={`refund-proof-approval ${approvalPending ? "refund-proof-approval-pending" : ""}`}
+        className={`refund-proof-approval ${approvalPending ? "refund-proof-approval-pending" : ""} ${approvalCollapsed ? "refund-proof-collapsed" : ""}`}
         aria-labelledby="refund-proof-approval-title"
         ref={approvalRegionRef}
         tabIndex={-1}
@@ -352,30 +370,43 @@ export function RefundProofHero({
           ) : null}
         </div>
 
-        <dl className="refund-proof-trial-data">
-          <div>
-            <dt>Trial ID</dt>
-            <dd><code>{trial?.ref.trialId ?? "Not staged"}</code></dd>
-          </div>
-          <div>
-            <dt>Payment</dt>
-            <dd><code>{trial?.paymentId ?? "Not staged"}</code></dd>
-          </div>
-          <div>
-            <dt>Amount</dt>
-            <dd>{trial ? `${(trial.amountMinor / 100).toFixed(2)} ${trial.currency}` : "Not staged"}</dd>
-          </div>
-          <div>
-            <dt>Request ID</dt>
-            <dd><code>{trial?.requestId ?? "Not staged"}</code></dd>
-          </div>
-          <div>
-            <dt>Approval</dt>
-            <dd className={approvalPending ? "refund-proof-value-pending" : trial?.approvalStatus === "approved" ? "refund-proof-value-ready" : ""}>
-              {approvalLabel}
-            </dd>
-          </div>
-        </dl>
+        {pastApproval && trial ? (
+          <p className="refund-proof-approval-summary">
+            <span aria-hidden="true">✓</span>
+            <strong>Approved</strong>
+            <span aria-hidden="true">·</span>
+            <code>{trial.paymentId}</code>
+            <span aria-hidden="true">·</span>
+            {(trial.amountMinor / 100).toFixed(2)} {trial.currency}
+            <span aria-hidden="true">·</span>
+            <code>{trial.requestId}</code>
+          </p>
+        ) : (
+          <dl className="refund-proof-trial-data">
+            <div>
+              <dt>Trial ID</dt>
+              <dd><code>{trial?.ref.trialId ?? "Not staged"}</code></dd>
+            </div>
+            <div>
+              <dt>Payment</dt>
+              <dd><code>{trial?.paymentId ?? "Not staged"}</code></dd>
+            </div>
+            <div>
+              <dt>Amount</dt>
+              <dd>{trial ? `${(trial.amountMinor / 100).toFixed(2)} ${trial.currency}` : "Not staged"}</dd>
+            </div>
+            <div>
+              <dt>Request ID</dt>
+              <dd><code>{trial?.requestId ?? "Not staged"}</code></dd>
+            </div>
+            <div>
+              <dt>Approval</dt>
+              <dd className={approvalPending ? "refund-proof-value-pending" : trial?.approvalStatus === "approved" ? "refund-proof-value-ready" : ""}>
+                {approvalLabel}
+              </dd>
+            </div>
+          </dl>
+        )}
 
         {approvalPending && trial ? (
           <button
@@ -394,10 +425,12 @@ export function RefundProofHero({
         </p>
       </section>
 
-      <div className="refund-proof-lanes" aria-label="Refund retry comparison">
-        <RefundLanePanel lane="broken" view={view.lanes.broken} proofReady={view.proof !== null} />
-        <RefundLanePanel lane="protected" view={view.lanes.protected} proofReady={view.proof !== null} />
-      </div>
+      {pastApproval ? (
+        <div className="refund-proof-lanes" aria-label="Refund retry comparison">
+          <RefundLanePanel lane="broken" view={view.lanes.broken} proofReady={view.proof !== null} />
+          <RefundLanePanel lane="protected" view={view.lanes.protected} proofReady={view.proof !== null} />
+        </div>
+      ) : null}
 
       {view.phase === "proof_ready" && view.proof ? (
         <section
@@ -444,6 +477,10 @@ export function RefundProofHero({
             </dl>
           </details>
         </section>
+      ) : null}
+
+      {simulation && simulationIsCompareOption ? (
+        <RefundSimulationPanel simulation={simulation} />
       ) : null}
 
       <footer className="refund-proof-disclosure">
@@ -561,11 +598,11 @@ function refundWorkflowGuide(
     return {
       accessibleName: "Workflow blocked",
       action: "enable-webmcp",
-      progress: "Setup needed",
-      actorLabel: "Blocked",
-      title: "Open this page in a WebMCP-capable browser",
-      description: "The agent cannot discover or call this page’s three tools in the current browser.",
-      secondary: "You can still run the four supporting UI examples below.",
+      progress: "Native path",
+      actorLabel: "Not in this browser",
+      title: "Run the same check with a simulated agent, or open a WebMCP browser",
+      description: "This browser has no WebMCP client, so an agent cannot discover or call the three tools here.",
+      secondary: "The simulated agent below runs the identical four steps against the real staging target and labels every step as simulated.",
       promptLabel: "",
       promptSummary: "",
       showPrompt: true,

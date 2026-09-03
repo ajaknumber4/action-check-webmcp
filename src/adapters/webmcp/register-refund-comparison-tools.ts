@@ -146,7 +146,7 @@ export function createRefundComparisonToolDefinitions(
       execute: async (input: unknown, options?: { signal?: AbortSignal }) => {
         const parsed = emptyInput.safeParse(input);
         if (!parsed.success) {
-          return invalidInput(session, "stage_refund_comparison");
+          return invalidInput(session, "stage_refund_comparison", parsed.error.issues);
         }
         return await session.agent.stageComparison({ signal: executionSignal(options) });
       },
@@ -161,7 +161,7 @@ export function createRefundComparisonToolDefinitions(
       execute: async (input: unknown, options?: { signal?: AbortSignal }) => {
         const parsed = issueRefundInput.safeParse(input);
         if (!parsed.success) {
-          return invalidInput(session, "issue_refund");
+          return invalidInput(session, "issue_refund", parsed.error.issues);
         }
         return await session.target.issueRefund(parsed.data, {
           signal: executionSignal(options),
@@ -178,7 +178,7 @@ export function createRefundComparisonToolDefinitions(
       execute: async (input: unknown, options?: { signal?: AbortSignal }) => {
         const parsed = emptyInput.safeParse(input);
         if (!parsed.success) {
-          return invalidInput(session, "prove_refund_comparison");
+          return invalidInput(session, "prove_refund_comparison", parsed.error.issues);
         }
         return await session.agent.proveComparison({ signal: executionSignal(options) });
       },
@@ -290,18 +290,47 @@ function executionSignal(options: { signal?: AbortSignal } | undefined): AbortSi
   return options?.signal ?? new AbortController().signal;
 }
 
+type SchemaIssue = Readonly<{
+  path: ReadonlyArray<PropertyKey>;
+  message: string;
+}>;
+
+const MAX_LISTED_ISSUES = 4;
+const MAX_INVALID_INPUT_MESSAGE_LENGTH = 500;
+
+/**
+ * Names the offending fields so an agent can self-correct on the next call,
+ * as Chrome's WebMCP best-practice guidance asks ("add descriptive errors to
+ * your function code to allow the model to self-correct"). Bounded so the
+ * message stays inside the recommended tool-output budget.
+ */
+function describeSchemaIssues(issues: ReadonlyArray<SchemaIssue>): string {
+  const listed = issues.slice(0, MAX_LISTED_ISSUES).map((issue) => {
+    const path = issue.path.map(String).join(".") || "input";
+    return `${path}: ${issue.message}`;
+  });
+  const remaining = issues.length - listed.length;
+  const suffix = remaining > 0 ? `; and ${remaining} more` : "";
+  return `${listed.join("; ")}${suffix}`;
+}
+
 function invalidInput(
   session: RefundComparisonSession,
   action: RefundComparisonAction,
+  issues: ReadonlyArray<SchemaIssue>,
 ): RefundComparisonOutcome {
+  const message = `Invalid ${action} arguments (${describeSchemaIssues(issues)}).`;
   return Object.freeze({
     ok: false,
     action,
     phase: session.observe.getSnapshot().phase,
     error: Object.freeze({
       code: "INPUT_MISMATCH",
-      message: "The WebMCP arguments did not match the strict staging tool schema.",
-      nextAction: "Read the tool schema and retry with only the documented fields.",
+      message:
+        message.length > MAX_INVALID_INPUT_MESSAGE_LENGTH
+          ? `${message.slice(0, MAX_INVALID_INPUT_MESSAGE_LENGTH - 1)}…`
+          : message,
+      nextAction: "Fix the listed fields and retry with only the documented fields.",
     }),
   });
 }

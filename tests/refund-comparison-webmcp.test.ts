@@ -260,3 +260,29 @@ describe("refund comparison WebMCP surface", () => {
     });
   });
 });
+
+describe("refund comparison WebMCP schema errors", () => {
+  it("names the offending fields so the agent can self-correct", async () => {
+    const session = createRefundComparisonSession();
+    const modelContext = new InMemoryModelContext();
+    const registration = registerRefundComparisonTools(session, modelContext);
+    await registration.ready;
+
+    const malformed = JSON.parse(
+      await modelContext.invoke("issue_refund", {
+        lane: "Broken",
+        paymentId: "pay-204",
+        amountMinor: 4200,
+        requestId: "refund-request-204",
+      }),
+    ) as { ok: boolean; error: { code: string; message: string; nextAction: string } };
+
+    expect(malformed).toMatchObject({
+      ok: false,
+      error: { code: "INPUT_MISMATCH" },
+    });
+    expect(malformed.error.message).toContain("lane");
+    expect(malformed.error.message).toContain("currency");
+    expect(malformed.error.message.length).toBeLessThanOrEqual(500);
+  });
+});

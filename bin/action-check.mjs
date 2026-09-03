@@ -352,12 +352,19 @@ async function run(options) {
       }
 
       log(`[action-check] observing lane=${lane} via ${options.observe}`);
-      const observed = await observeFn({
-        lane,
-        run: runs[lane],
-        targetBaseUrl: options.targetBaseUrl,
-        pageOrigin,
-      });
+      let observed;
+      try {
+        observed = await observeFn({
+          lane,
+          run: runs[lane],
+          targetBaseUrl: options.targetBaseUrl,
+          pageOrigin,
+        });
+      } catch (error) {
+        throw new HarnessError(
+          `observe() failed for lane=${lane} against ${options.targetBaseUrl}: ${error?.message ?? error}. If the page talks to a deployed staging target, pass --target-base-url <that origin>; the default is the local worker.`,
+        );
+      }
       lanes[lane] = { calls, observed };
     }
 
