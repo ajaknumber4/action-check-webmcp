@@ -31,7 +31,7 @@ The judge path is a broken-versus-protected refund comparison:
 | 3 | Agent | Calls `issue_refund` twice for the broken lane and twice for the protected lane |
 | 4 | Agent + Action Check | The agent calls `prove_refund_comparison`; Action Check reads both staging lanes through the separate observation endpoint and renders the proof |
 
-**Example prompt** (the page's **Copy agent instruction** button produces the exact text): "Call stage_refund_comparison with {}. Wait until I approve the exact trial shown on the page. Call issue_refund twice for lane \"broken\" using the approved payment, amount, currency and request ID; the first call is expected to return PROVIDER_ACK_LOST_AFTER_COMMIT, retry once with identical arguments. Do the same for lane \"protected\". Then call prove_refund_comparison with {}."
+**Example prompt** (abridged; the page's **Copy agent instruction** button produces the full version with the exact approved values): "Call stage_refund_comparison with {}. Wait until I approve the exact trial shown on the page. Call issue_refund twice for lane \"broken\" using the approved payment, amount, currency and request ID; the first call is expected to return PROVIDER_ACK_LOST_AFTER_COMMIT, retry once with identical arguments. Do the same for lane \"protected\". Then call prove_refund_comparison with {}."
 
 For each lane, the first refund commits and the harness deliberately drops the synthetic provider acknowledgement. The agent receives a bounded error and retries with the same request ID:
 

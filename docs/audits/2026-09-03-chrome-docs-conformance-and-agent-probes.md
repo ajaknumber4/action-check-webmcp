@@ -186,6 +186,8 @@ The founder chose the light interface. Actions taken, in order:
 5. Live re-verification against the stable URL: e2e 20/20, native 1/1, CLI PASS (2 vs 1), zero console errors, favicon 200.
 6. Release captures recorded from the deployed build at 1280×720 and written to `docs/screenshots/` (three replaced, one added for the fallback state).
 
+7. Re-ran the 36 off-script probes against the deployed build at 12:33 BST (`scripts/agent-recovery-probes.mjs`, now in the repository so a judge can reproduce it). All 36 still fail closed with `code`, `message`, `nextAction`; proof still 2 versus 1. Through real Chrome `executeTool` the two fixes now read as intended: `issue_refund` after staging returns "The staged trial is waiting for a person to approve it on the page" with the hint to wait for the approval press and not re-stage; schema failures name the field, for example `currency: Invalid input: expected string, received undefined`, `lane: Invalid option: expected one of "broken"|"protected"`, `input: Unrecognized key: "note"`. Findings 1 and 2 are closed on the live build.
+
 Still owed by the founder on this exact build: the ChatGPT in-app-browser journey (section 6), the public video, the Devpost description and gallery refresh, and Submit.
 
 ## 10. Evidence retained
