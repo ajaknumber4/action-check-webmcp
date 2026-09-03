@@ -230,10 +230,6 @@ export function WorkbenchPage({
           />
 
           <footer className="runner-intro">
-            <p>
-              Action Check is a browser test lab for developers and QA teams building agent
-              actions. It catches duplicate effects, stale approvals, and false success before production.
-            </p>
             <small>External synthetic staging demo · no payment account connected · no real money moves</small>
           </footer>
         </section>

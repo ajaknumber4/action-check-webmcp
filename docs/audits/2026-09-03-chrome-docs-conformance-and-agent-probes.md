@@ -190,7 +190,20 @@ The founder chose the light interface. Actions taken, in order:
 
 Still owed by the founder on this exact build: the ChatGPT in-app-browser journey (section 6), the public video, the Devpost description and gallery refresh, and Submit.
 
-## 10. Evidence retained
+## 10. External-target mode (13:00–13:15 BST)
+
+The founder asked for the check to work on targets Action Check does not own. Added `--input`, `--mode`, `--settle-ms` to `bin/action-check.mjs`, `bin/lib/run-generic.mjs` (drive any registered tool, observe before and after, verdict from observations only), and `bin/lib/generic-verdict.mjs` with 12 unit tests. Chrome 152 reconnaissance of Google's demos showed native registration on order-tracking (1 read-only tool), french-bistro (1 declarative booking tool), hotel-chain (3 read tools), ticket-booking (3), pizza-maker (7 imperative tools with DOM-visible state).
+
+| Target (page not owned by Action Check) | Run | Verdict |
+|---|---|---|
+| zaMaker `add_topping {🍍, count 1}` | retry | FAIL `DUPLICATE_EFFECT`, rendered toppings 0 → 2, exit 1 |
+| zaMaker `remove_topping {🍍}` on an empty pizza | once | PASS `HONEST_REFUSAL`, reply "Topping 🍍 not found", 0 → 0 |
+| zaMaker `set_pizza_size {Large}` | retry | PASS `IDEMPOTENT`, size label Large once |
+| Le Petit Bistro `book_table_le_petit_bistro` (declarative) | retry | Not checked: the form submits and navigates, Playwright reports the target closed; now surfaced as a harness error naming the limit |
+
+String replies are classified with a bounded refusal heuristic ("not found", "invalid", "cannot", …); the raw reply is kept in the proof JSON.
+
+## 11. Evidence retained
 
 - CLI proof JSON and stderr, probe log (36 entries), and page screenshots with and without the flag are in the session scratchpad; the tables above reproduce the parts that matter.
 - Fetched doc copies: nine Chrome pages as `.md.txt`, the demos README, `AWESOME_WEBMCP.md`, `webmcp-evals` README, the showcase page and one entry page.

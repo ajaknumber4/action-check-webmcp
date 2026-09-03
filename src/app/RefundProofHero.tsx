@@ -74,9 +74,9 @@ const FIXED_TRIAL = {
 } as const;
 
 const PATH_STAGES = [
-  { label: "You + agent", detail: "Send prompt; reset staging" },
-  { label: "You", detail: "Approve the $42 staging fixture" },
-  { label: "Agent", detail: "Runs both retry versions" },
+  { label: "You + agent", detail: "Send the prompt; agent stages a $42 refund" },
+  { label: "You", detail: "Approve the exact values" },
+  { label: "Agent", detail: "Refunds twice per lane, same request ID" },
   { label: "Action Check", detail: "Reads the ledger: 2 vs 1" },
 ] as const;
 
@@ -356,7 +356,7 @@ export function RefundProofHero({
           </h3>
           <p>
             {trial
-              ? "Approval is bound to these exact values. A changed request must be approved again."
+              ? "Approval is bound to these values. If anything changes, it has to be approved again."
               : "No target call is allowed until a person reviews the exact staging fixture."}
           </p>
           {trial ? (
@@ -443,7 +443,6 @@ export function RefundProofHero({
           <div>
             <span className="refund-proof-panel-label">Checker validated</span>
             <h3 id="refund-proof-result-title">Caught the unsafe duplicate. Protected stayed single.</h3>
-            <p><strong>Observed outcome:</strong> {view.proof.summary}</p>
           </div>
           <dl>
             <div className="refund-proof-result-broken">
@@ -536,8 +535,8 @@ function refundWorkflowGuide(
       progress: "Complete",
       actorLabel: "Proof ready",
       title: "Unsafe created 2 refunds. Protected created 1.",
-      description: "Action Check read the staging ledger separately instead of trusting the tool response.",
-      secondary: "No further action. You and the agent can read the same bound result below.",
+      description: "Verdict from the ledger, not the tool reply. The bound result is below.",
+      secondary: "",
       promptLabel: "",
       promptSummary: "",
       showPrompt: false,
@@ -552,10 +551,10 @@ function refundWorkflowGuide(
       progress: "Step 2 of 4",
       actorLabel: "Next — You",
       title: "Staging reset passed — approve the $42 request",
-      description: "The external target is clean. Check the payment, amount, and request ID before approval.",
+      description: "Check the payment, amount, and request ID. This button is not a tool: an agent cannot press it.",
       secondary: "Agent is waiting",
       promptLabel: "Agent is waiting",
-      promptSummary: "Do not call issue_refund until the page shows Approved.",
+      promptSummary: "After approving, tell your agent to continue.",
       showPrompt: true,
       canCopyPrompt: false,
     };
@@ -601,8 +600,8 @@ function refundWorkflowGuide(
       progress: "Native path",
       actorLabel: "Not in this browser",
       title: "Run the same check with a simulated agent, or open a WebMCP browser",
-      description: "This browser has no WebMCP client, so an agent cannot discover or call the three tools here.",
-      secondary: "The simulated agent below runs the identical four steps against the real staging target and labels every step as simulated.",
+      description: "This browser has no WebMCP client. The simulated agent below runs the same four steps against the real staging target; every result is labelled as simulated.",
+      secondary: "",
       promptLabel: "",
       promptSummary: "",
       showPrompt: true,
@@ -617,10 +616,10 @@ function refundWorkflowGuide(
       progress: "Step 1 of 4",
       actorLabel: "Next — Agent",
       title: "Send this instruction to your agent",
-      description: "The agent first resets the external staging target, then pauses for your approval. No refund call runs if reset fails.",
-      secondary: "Your role: send the instruction now, then review the request when it appears.",
+      description: "The agent stages a fictional refund and stops for your approval.",
+      secondary: "",
       promptLabel: "Agent instruction",
-      promptSummary: "The agent will stage the $42 test and stop for your approval.",
+      promptSummary: "Stage the refund comparison on this page and stop for my approval.",
       showPrompt: true,
       canCopyPrompt: true,
     };
@@ -650,8 +649,8 @@ function refundWorkflowGuide(
       progress: "Step 4 of 4",
       actorLabel: "Next — Agent",
       title: "Verify the outcome",
-      description: "Both versions ran twice. The agent now calls prove_refund_comparison to compare the refund counts.",
-      secondary: "Your role: wait for the 2-versus-1 proof below.",
+      description: "Both lanes ran twice. The agent calls prove_refund_comparison; no further refund calls.",
+      secondary: "",
       promptLabel: "Agent instruction",
       promptSummary: "Call prove_refund_comparison now. Do not call issue_refund again.",
       showPrompt: true,
@@ -666,8 +665,8 @@ function refundWorkflowGuide(
       progress: `Step 3 of 4 · ${callsComplete}/4 calls`,
       actorLabel: "Next — Agent",
       title: "Retry with the same request ID",
-      description: "The first refund committed, but its acknowledgement was lost. Repeat that lane once with identical values.",
-      secondary: "Your role: watch the counters. No second approval is needed.",
+      description: "The refund committed but the acknowledgement was lost. The agent repeats that lane once, same request ID.",
+      secondary: "",
       promptLabel: "Agent instruction",
       promptSummary: "Retry the lost acknowledgement once, using the exact same approved values.",
       showPrompt: true,
@@ -682,8 +681,8 @@ function refundWorkflowGuide(
       progress: `Step 3 of 4 · ${callsComplete}/4 calls`,
       actorLabel: "Next — Agent",
       title: "Run the remaining version",
-      description: "One retry comparison is complete. The agent should start the other lane with the same approved values.",
-      secondary: "Your role: watch the counters. No second approval is needed.",
+      description: "One lane is complete. The agent runs the other lane with the same approved values.",
+      secondary: "",
       promptLabel: "Agent instruction",
       promptSummary: "Run only the incomplete lane; completed deliveries must not be repeated.",
       showPrompt: true,
@@ -697,8 +696,8 @@ function refundWorkflowGuide(
     progress: "Step 3 of 4 · 0/4 calls",
     actorLabel: "Next — Agent",
     title: "Return to your agent and say continue",
-    description: "Approval does not wake the chat. The agent must now run the unsafe and protected retry versions.",
-    secondary: "Your role: watch the two refund counters. No second approval is needed.",
+    description: "Approval does not wake the chat. The agent now runs both lanes, twice each, same request ID.",
+    secondary: "",
     promptLabel: "Agent instruction",
     promptSummary: "Continue with the approved refund test and run both retry versions.",
     showPrompt: true,
@@ -750,7 +749,7 @@ function nativeRegistrationPresentation(
         };
       }
       return {
-        kicker: "WebMCP fixture · external staging",
+        kicker: "Refund · same request ID · retried once",
         description:
           "The agent retries the same staging refund through WebMCP. Action Check reads the ledger separately and catches the unsafe duplicate.",
         promptTitle: "Agent prompt ready",
@@ -1009,8 +1008,8 @@ function RefundSimulationPanel({
       <div className="refund-proof-simulation-controls">
         <p>
           {secondary
-            ? "Compare: run the same four documented steps without native WebMCP."
-            : "No WebMCP client detected in this browser. Run the same four documented steps with an honestly-labelled in-page simulated agent instead."}
+            ? "Or run the same four steps with a simulated agent, labelled as simulated."
+            : "No WebMCP in this browser. Run the same four steps with a simulated agent; every result is labelled as simulated."}
         </p>
         <button
           type="button"

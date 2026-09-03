@@ -20,6 +20,8 @@ The light lab-report interface, the agent-recovery message fixes, and the favico
 | Off-script agent probes (36 calls: prove before staging, issue before approval, double stage, wrong and malformed arguments, third call, prove early, re-stage mid-flight, non-JSON input) | Every call fail-closed with `code`, `message`, `nextAction`; see `docs/audits/2026-09-03-chrome-docs-conformance-and-agent-probes.md` |
 | Console on the live page | Zero errors or warnings (the earlier `/favicon.ico` 404 is gone) |
 | Release captures | `action-check-live-discovery.jpg`, `action-check-live-approval.jpg`, `action-check-live-proof.jpg`, `action-check-live-simulated-fallback.jpg` captured from the deployed 3 September build at 1280×720 |
+| External-target mode (`bin/action-check.mjs run … --input`) against Google's WebMCP zaMaker demo, Chrome 152 | `add_topping` retry: FAIL `DUPLICATE_EFFECT` (0 → 2 rendered toppings, exit 1); `remove_topping` once on an empty pizza: PASS `HONEST_REFUSAL`; `set_pizza_size` retry: PASS `IDEMPOTENT`. 12 unit tests on the generic verdict |
+| Le Petit Bistro declarative booking tool | Navigates on submit and detaches the page; reported as a harness error, not checked (known v0.1 limit) |
 | ChatGPT in-app browser | Not re-run on this build; last passed on the 1 September build |
 
 ## Public release record (1 September)

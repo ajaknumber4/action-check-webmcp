@@ -8,7 +8,7 @@
 // independently observed effect count supplied by an `--observe` module.
 // v0 supports exactly one fixture: the refund-comparison staging demo.
 //
-// Usage:
+// Usage (built-in refund fixture):
 //   node bin/action-check.mjs run \
 //     --url <page> \
 //     --tool issue_refund \
@@ -16,6 +16,14 @@
 //     [--request-id refund-request-204] \
 //     [--headed] \
 //     [--target-base-url http://127.0.0.1:8787]
+//
+// Usage (external target -- any page's registered WebMCP tool):
+//   node bin/action-check.mjs run \
+//     --url <page> \
+//     --tool <tool name> \
+//     --input '<json arguments>' \
+//     --observe <module.mjs> \
+//     [--mode retry|once] [--settle-ms 1500] [--headed]
 //
 // Exit codes: 0 PASS, 1 FAIL, 2 harness/usage error.
 
@@ -25,6 +33,7 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 
 import { computeVerdict } from "./lib/verdict.mjs";
+import { GenericHarnessError, runGeneric } from "./lib/run-generic.mjs";
 
 const SUPPORTED_TOOL = "issue_refund";
 const FIXTURE_TOOL_NAMES = Object.freeze([
@@ -51,8 +60,11 @@ function usage() {
     "Usage: node bin/action-check.mjs run --url <page> --tool issue_refund --observe <module.mjs>",
     "                                      [--request-id refund-request-204] [--headed]",
     "                                      [--target-base-url http://127.0.0.1:8787]",
+    "   or: node bin/action-check.mjs run --url <page> --tool <name> --input '<json>' --observe <module.mjs>",
+    "                                      [--mode retry|once] [--settle-ms 1500] [--headed]",
     "",
-    "v0 supports exactly one fixture: the refund-comparison staging demo's issue_refund tool.",
+    "Without --input the built-in refund-comparison fixture runs (issue_refund only).",
+    "With --input any page's registered WebMCP tool is the target; observe(ctx) reads that page's own state.",
   ].join("\n");
 }
 
@@ -68,6 +80,9 @@ function parseArgs(argv) {
     requestId: DEFAULT_REQUEST_ID,
     headed: false,
     targetBaseUrl: DEFAULT_TARGET_BASE_URL,
+    input: undefined,
+    mode: undefined,
+    settleMs: undefined,
   };
 
   const takeValue = (flag, index) => {
@@ -104,6 +119,24 @@ function parseArgs(argv) {
       case "--headed":
         options.headed = true;
         break;
+      case "--input": {
+        const raw = takeValue(arg, i + 1);
+        try {
+          options.input = JSON.parse(raw);
+        } catch (error) {
+          throw new UsageError(`--input must be valid JSON (${error?.message ?? error}).\n\n${usage()}`);
+        }
+        i += 1;
+        break;
+      }
+      case "--mode":
+        options.mode = takeValue(arg, i + 1);
+        i += 1;
+        break;
+      case "--settle-ms":
+        options.settleMs = Number(takeValue(arg, i + 1));
+        i += 1;
+        break;
       default:
         throw new UsageError(`Unknown flag "${arg}".\n\n${usage()}`);
     }
@@ -119,10 +152,14 @@ function parseArgs(argv) {
     }
   }
 
-  if (options.tool !== SUPPORTED_TOOL) {
+  options.external = options.input !== undefined;
+  if (!options.external && options.tool !== SUPPORTED_TOOL) {
     throw new UsageError(
-      `v0 only supports --tool ${SUPPORTED_TOOL} (got "${options.tool}"). ${usage()}`,
+      `Without --input only the built-in fixture runs (--tool ${SUPPORTED_TOOL}; got "${options.tool}"). Pass --input '<json>' to target any page's tool. ${usage()}`,
     );
+  }
+  if (options.external && options.mode !== undefined && options.mode !== "retry" && options.mode !== "once") {
+    throw new UsageError(`--mode must be retry or once (got "${options.mode}").\n\n${usage()}`);
   }
 
   return options;
@@ -399,7 +436,7 @@ async function run(options) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const proof = await run(options);
+  const proof = options.external ? await runGeneric(options, { chromium }) : await run(options);
   process.stdout.write(`${JSON.stringify(proof, null, 2)}\n`);
   process.exit(proof.verdict.status === "PASS" ? 0 : 1);
 }
@@ -412,6 +449,10 @@ main().catch((error) => {
   if (typeof error?.exitCode === "number") {
     log(error.message);
     process.exit(error.exitCode);
+  }
+  if (error instanceof GenericHarnessError) {
+    log(`[action-check] harness error: ${error.message}`);
+    process.exit(2);
   }
   log("[action-check] harness error:", error?.stack ?? error);
   process.exit(2);

@@ -16,6 +16,7 @@ The WebMCP Challenge submission period opened on **2026-08-25 at 11:00 Pacific T
 | External refund staging target | 2026-08-31 | Durable synthetic Worker, browser adapter, local end-to-end proof, and generated UUID effect evidence implemented and verified locally |
 | Headless retry-proof CLI (v0) | 2026-09-02 | `bin/action-check` drives real Chrome with the WebMCP flag against a target page, performs the approval click, invokes `issue_refund` twice per lane, and cross-checks a separately supplied `observe()`; verified locally and against the public deployment |
 | Light lab-report interface, agent-recovery message fixes, favicon | 2026-09-03 | Deployed to the stable URL at 12:19 BST and verified live: 20/20 browser journeys, 1/1 native Chrome 152 WebMCP journey, CLI PASS, 36 off-script probes fail-closed, zero console errors |
+| External-target mode for the CLI (v0.1) | 2026-09-03 | `--input` targets any page's registered WebMCP tool; verdict from a caller-supplied observe() only; run against Google's zaMaker demo in Chrome 152 (duplicate on retry caught, honest refusal and idempotent set confirmed) |
 | Public repository | 2026-09-01 | `github.com/ajaknumber4/action-check-webmcp`, published as snapshot commits (first snapshot `c0dc36e`); the private working history is not pushed |
 | Public HTTPS deployment | 2026-09-01 | Live at https://action-check-webmcp.vercel.app/ (Vercel); synthetic refund-staging Worker deployed alongside — see README |
 | Public demo video | Pending | No video URL exists |
@@ -39,7 +40,8 @@ All recorded implementation work falls after the submission period opened. Pendi
 - Four supporting deterministic fixtures for booking drift, duplicate refunds, cloud false success, and social-publish false success
 - A visible bug-sensitivity check and safe recovery path for each supporting fixture
 - A blocked-by-default External Target staging protocol, browser client, same-origin broker, and optional tool-registration gate
-- A headless `bin/action-check` CLI (v0) that runs the same comparison from outside the page in real Chrome with the WebMCP flag and cross-checks tool claims against a caller-supplied independent `observe()`; refund fixture only
+- A headless `bin/action-check` CLI (v0) that runs the same comparison from outside the page in real Chrome with the WebMCP flag and cross-checks tool claims against a caller-supplied independent `observe()`
+- An external-target mode for that CLI (v0.1): any page's registered WebMCP tool, called once or twice with identical input, verdict taken only from before/after observations of that page's own state; demonstrated on a page Action Check does not own
 - Browser interface, accessibility behavior, automated tests, public-boundary controls, and release documentation
 
 ## Independence and data origin

@@ -83,7 +83,7 @@ WebMCP lets a site expose typed actions that an agent can discover and invoke in
 
 **How it differs from a reference implementation of a safe action.** Some entries build the guarantee into their own tool: a one-time approval consumed atomically before the provider call, plus a signed receipt (Witnessed Refund is a well-made example). Action Check is the test that tells you whether *your* tool has that property. It does not need the tool's internals instrumented: it drives the action from outside, reads the resulting state from a ledger the tool does not control, and reports the gap between what the tool claimed and what happened. The same harness runs against a broken target and a protected one in one trial, which is why it can show two effects versus one. Proof from outside is the product; the refund fixture is only the first target.
 
-This entry proves the pattern with an Action Check-owned fixture. It does not yet connect to or automatically test a WebMCP tool registered by another team's site; that future adapter would need to map the external tool's invocation and authoritative outcome source into the same contract.
+The refund fixture is Action Check-owned. The same check also runs against tools Action Check does not own: the CLI's external-target mode (below) drives any page's registered WebMCP tool and takes its verdict from a caller-supplied read of that page's own state. It was run on 3 September against Google's public WebMCP zaMaker demo in real Chrome 152.
 
 It does not claim that WebMCP automatically provides authorization, idempotency, durable execution, or truthful postconditions. Those are application responsibilities; Action Check makes them visible and testable.
 
@@ -126,7 +126,28 @@ For a production frontend build, set `VITE_REFUND_STAGING_TARGET_URL` to the exa
 
 ## Run the check from outside (CLI v0)
 
-`node bin/action-check.mjs run --url <page> --tool issue_refund --observe <module.mjs>` drives real Chrome 149+ (launched with `--enable-features=WebMCP`; the bundled Playwright Chromium does not implement native WebMCP), performs the human approval click itself, invokes `issue_refund` twice per lane with one request ID, and cross-checks the tool's own claims against an independently observed effect count. Your `observe()` module must read a store the tool never writes back into its own response, or the check proves nothing. v0 supports exactly the refund-comparison fixture (see `examples/observe-refund-staging.mjs`). Proof JSON goes to stdout, PASS/FAIL to the exit code.
+`node bin/action-check.mjs run --url <page> --tool issue_refund --observe <module.mjs>` drives real Chrome 149+ (launched with `--enable-features=WebMCP`; the bundled Playwright Chromium does not implement native WebMCP), performs the human approval click itself, invokes `issue_refund` twice per lane with one request ID, and cross-checks the tool's own claims against an independently observed effect count. Your `observe()` module must read a store the tool never writes back into its own response, or the check proves nothing. The built-in fixture is the refund comparison (see `examples/observe-refund-staging.mjs`). Proof JSON goes to stdout, PASS/FAIL to the exit code.
+
+### Point it at any page's tool (external-target mode, v0.1)
+
+Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema from `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict only from the two observations. `observe(ctx)` receives the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API; it is never shown the tool's reply.
+
+Runs recorded on 3 September against Google's public [WebMCP zaMaker demo](https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/), a page Action Check does not own, in Chrome 152:
+
+| Tool and input | Mode | Observation (`examples/`) | Verdict |
+|---|---|---|---|
+| `add_topping {"topping":"🍍","count":1}` | retry | rendered `🍍` topping count, 0 → 2 | **FAIL `DUPLICATE_EFFECT`**: a retried call adds a second topping, so this tool is not safe for an agent to retry after a lost reply |
+| `remove_topping {"topping":"🍍"}` on an empty pizza | once | topping count, 0 → 0 | PASS `HONEST_REFUSAL`: reply "Topping 🍍 not found", nothing changed |
+| `set_pizza_size {"size":"Large"}` | retry | rendered size label | PASS `IDEMPOTENT`: two calls leave the page in the requested size once |
+
+```sh
+node bin/action-check.mjs run \
+  --url https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/ \
+  --tool add_topping --input '{"topping":"🍍","count":1}' \
+  --observe examples/observe-pizza-toppings.mjs --mode retry
+```
+
+Verdict codes: `IDEMPOTENT`, `DUPLICATE_EFFECT`, `NO_EFFECT` (retry mode); `EFFECT_CONFIRMED`, `FALSE_SUCCESS`, `SILENT_EFFECT`, `HONEST_REFUSAL` (once mode). Known limit: declarative form tools that navigate on submit (for example the Le Petit Bistro demo) replace the document mid-call and are reported as a harness error rather than checked; supporting them is the next step. The refund fixture keeps its own path because it also injects the lost acknowledgement and runs a human approval, which the generic mode does not do.
 
 ## Verify
 

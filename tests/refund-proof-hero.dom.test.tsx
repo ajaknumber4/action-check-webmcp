@@ -406,7 +406,7 @@ describe("RefundProofHero", () => {
     const prompt = screen.getByLabelText("Agent prompt");
     const exactPrompt = prompt.querySelector("code")?.textContent;
     expect(exactPrompt).toBeTruthy();
-    expect(prompt).toHaveTextContent("The agent will stage the $42 test and stop for your approval.");
+    expect(prompt).toHaveTextContent("Stage the refund comparison on this page and stop for my approval.");
     const exactInstructions = within(prompt).getByText(
       "View exact WebMCP instructions",
     );
