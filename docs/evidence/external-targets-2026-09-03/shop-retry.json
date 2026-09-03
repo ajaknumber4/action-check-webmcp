@@ -1,0 +1,63 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/sport-shop-angular/#/search?q=ball&category=SOCCER",
+  "tool": "add_search_result_to_cart",
+  "input": {
+    "productId": "google-mls-pro-ball"
+  },
+  "mode": "retry",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "add_search_result_to_cart",
+      "get_current_search_results",
+      "get_product_info",
+      "get_store_promos_and_rules",
+      "open_cart",
+      "refine_search",
+      "search_product",
+      "view_product"
+    ],
+    "description": "Adds a product from the current search results to the shopping cart. You can provide its index, exact productId, or productName.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"number\",\"description\":\"The index of the item in the search results. (e.g. 0, first, second, 3rd etc.)\"},\"productId\":{\"type\":\"string\",\"description\":\"The unique ID of the product.\"},\"productName\":{\"type\":\"string\",\"description\":\"A part of the product name or keywords to match (e.g. 'training balls').\"}}}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "site-persisted cart: localStorage['kinetic_cart'] line count",
+      "phase": "before",
+      "lines": 0,
+      "productIds": []
+    }
+  },
+  "calls": [
+    {
+      "success": true,
+      "message": "Added 'Google Pro Match Ball' to cart."
+    },
+    {
+      "success": true,
+      "message": "Added 'Google Pro Match Ball' to cart."
+    }
+  ],
+  "after": {
+    "effectCount": 2,
+    "evidence": {
+      "source": "site-persisted cart: localStorage['kinetic_cart'] line count",
+      "phase": "after",
+      "lines": 2,
+      "productIds": [
+        null,
+        null
+      ]
+    }
+  },
+  "verdict": {
+    "status": "FAIL",
+    "code": "DUPLICATE_EFFECT",
+    "reason": "two identical calls created 2 new effects (observed 0 -> 2); the tool is not idempotent on retry",
+    "effectDelta": 2
+  },
+  "generatedAt": "2026-09-03T12:01:45.690Z"
+}

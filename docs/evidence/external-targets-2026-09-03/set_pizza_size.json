@@ -1,0 +1,53 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/",
+  "tool": "set_pizza_size",
+  "input": {
+    "size": "Large"
+  },
+  "mode": "retry",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "add_topping",
+      "manage_pizza",
+      "remove_topping",
+      "set_pizza_size",
+      "set_pizza_style",
+      "share_pizza",
+      "toggle_layer"
+    ],
+    "description": "Set the pizza size directly or infer it based on the number of people.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"size\":{\"type\":\"string\",\"enum\":[\"Small\",\"Medium\",\"Large\",\"Extra Large\"],\"description\":\"The specific size name.\"},\"number_of_persons\":{\"type\":\"number\",\"description\":\"The number of people eating to help infer the correct size.\"}}}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #size-text",
+      "phase": "before",
+      "wanted": "Large",
+      "rendered": "Medium"
+    }
+  },
+  "calls": [
+    "Set pizza size to Large.",
+    "Set pizza size to Large."
+  ],
+  "after": {
+    "effectCount": 1,
+    "evidence": {
+      "source": "rendered DOM: #size-text",
+      "phase": "after",
+      "wanted": "Large",
+      "rendered": "Large"
+    }
+  },
+  "verdict": {
+    "status": "PASS",
+    "code": "IDEMPOTENT",
+    "reason": "two identical calls left exactly one new effect (observed 0 -> 1); second call claimed success and reused the effect",
+    "effectDelta": 1
+  },
+  "generatedAt": "2026-09-03T11:56:04.589Z"
+}

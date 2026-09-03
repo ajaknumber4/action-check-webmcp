@@ -1,0 +1,58 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/",
+  "tool": "add_topping",
+  "input": {
+    "topping": "🍍",
+    "count": 1
+  },
+  "mode": "retry",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "add_topping",
+      "manage_pizza",
+      "remove_topping",
+      "set_pizza_size",
+      "set_pizza_style",
+      "share_pizza",
+      "toggle_layer"
+    ],
+    "description": "Add one or more toppings to the pizza",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"topping\":{\"type\":\"string\",\"enum\":[\"🍕\",\"🍄\",\"🌿\",\"🍍\",\"🫑\",\"🥓\",\"🧅\",\"🫒\",\"🌽\",\"🌶️\",\"🐑\"]},\"size\":{\"type\":\"string\",\"enum\":[\"Small\",\"Medium\",\"Large\",\"Extra Large\"]},\"count\":{\"type\":\"integer\",\"minimum\":1,\"description\":\"Number of toppings to add\"}},\"required\":[\"topping\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #pizza-container .topping[data-emoji]",
+      "phase": "before",
+      "topping": "🍍",
+      "matchingToppings": 0,
+      "totalToppings": 0,
+      "pizzaSize": "Medium"
+    }
+  },
+  "calls": [
+    "Added 1 🍍 topping(s)",
+    "Added 1 🍍 topping(s)"
+  ],
+  "after": {
+    "effectCount": 2,
+    "evidence": {
+      "source": "rendered DOM: #pizza-container .topping[data-emoji]",
+      "phase": "after",
+      "topping": "🍍",
+      "matchingToppings": 2,
+      "totalToppings": 2,
+      "pizzaSize": "Medium"
+    }
+  },
+  "verdict": {
+    "status": "FAIL",
+    "code": "DUPLICATE_EFFECT",
+    "reason": "two identical calls created 2 new effects (observed 0 -> 2); the tool is not idempotent on retry",
+    "effectDelta": 2
+  },
+  "generatedAt": "2026-09-03T11:55:57.843Z"
+}

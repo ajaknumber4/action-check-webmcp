@@ -1,0 +1,59 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/smart-home/#/",
+  "tool": "rearrangeDOMComponents",
+  "input": {
+    "componentIds": [
+      "nonexistent_widget"
+    ]
+  },
+  "mode": "once",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "rearrangeDOMComponents"
+    ],
+    "description": "Rearranges the user's home dashboard by adding, removing, or reordering smart home control components based on the user's intent.",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"componentIds\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"Array of component IDs to display on the dashboard. Examples: 'thermostat_control', 'camera_front_door', 'lock_front_door', 'smart_lights_living_room', 'energy_summary', 'weather_widget', 'media_player_living_room', 'alarm_panel', 'air_quality_sensor', 'robot_vacuum', 'solar_grid'\"}},\"required\":[\"componentIds\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 1,
+    "evidence": {
+      "source": "rendered DOM: .bento-grid > div (dashboard component cards)",
+      "phase": "before",
+      "requestedComponentIds": [
+        "nonexistent_widget"
+      ],
+      "renderedComponents": 1
+    }
+  },
+  "calls": [
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "Dashboard successfully updated with requested components."
+        }
+      ]
+    }
+  ],
+  "after": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: .bento-grid > div (dashboard component cards)",
+      "phase": "after",
+      "requestedComponentIds": [
+        "nonexistent_widget"
+      ],
+      "renderedComponents": 0
+    }
+  },
+  "verdict": {
+    "status": "FAIL",
+    "code": "FALSE_SUCCESS",
+    "reason": "the tool claimed success but no effect appeared (observed 1 -> 0)",
+    "effectDelta": -1
+  },
+  "generatedAt": "2026-09-03T12:01:36.927Z"
+}

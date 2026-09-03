@@ -1,0 +1,56 @@
+{
+  "version": "v0.1-external-target",
+  "url": "https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/",
+  "tool": "remove_topping",
+  "input": {
+    "topping": "🍍"
+  },
+  "mode": "once",
+  "chromeVersion": "152.0.7977.65",
+  "toolSurface": {
+    "registered": [
+      "add_topping",
+      "manage_pizza",
+      "remove_topping",
+      "set_pizza_size",
+      "set_pizza_style",
+      "share_pizza",
+      "toggle_layer"
+    ],
+    "description": "Remove a specific topping from the pizza",
+    "inputSchema": "{\"type\":\"object\",\"properties\":{\"topping\":{\"type\":\"string\",\"enum\":[\"🍕\",\"🍄\",\"🌿\",\"🍍\",\"🫑\",\"🥓\",\"🧅\",\"🫒\",\"🌽\",\"🌶️\",\"🐑\"]},\"all\":{\"type\":\"boolean\",\"description\":\"Remove all toppings of this type\"}},\"required\":[\"topping\"]}",
+    "annotations": null
+  },
+  "before": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #pizza-container .topping[data-emoji]",
+      "phase": "before",
+      "topping": "🍍",
+      "matchingToppings": 0,
+      "totalToppings": 0,
+      "pizzaSize": "Medium"
+    }
+  },
+  "calls": [
+    "Topping 🍍 not found"
+  ],
+  "after": {
+    "effectCount": 0,
+    "evidence": {
+      "source": "rendered DOM: #pizza-container .topping[data-emoji]",
+      "phase": "after",
+      "topping": "🍍",
+      "matchingToppings": 0,
+      "totalToppings": 0,
+      "pizzaSize": "Medium"
+    }
+  },
+  "verdict": {
+    "status": "PASS",
+    "code": "HONEST_REFUSAL",
+    "reason": "the tool reported failure and nothing changed (observed 0 -> 0)",
+    "effectDelta": 0
+  },
+  "generatedAt": "2026-09-03T11:56:00.436Z"
+}
