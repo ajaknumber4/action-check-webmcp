@@ -132,19 +132,22 @@ For a production frontend build, set `VITE_REFUND_STAGING_TARGET_URL` to the exa
 
 Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema from `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict only from the two observations. `observe(ctx)` receives the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API; it is never shown the tool's reply.
 
-Runs recorded on 3 September against Google's public [WebMCP zaMaker demo](https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/), a page Action Check does not own, in Chrome 152:
+Runs recorded on 3 September against three of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos), pages Action Check does not own, in Chrome 152. Proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`.
 
-| Tool and input | Mode | Observation (`examples/`) | Verdict |
+| Demo and tool | Mode | Observation (`examples/`) | Verdict |
 |---|---|---|---|
-| `add_topping {"topping":"🍍","count":1}` | retry | rendered `🍍` topping count, 0 → 2 | **FAIL `DUPLICATE_EFFECT`**: a retried call adds a second topping, so this tool is not safe for an agent to retry after a lost reply |
-| `remove_topping {"topping":"🍍"}` on an empty pizza | once | topping count, 0 → 0 | PASS `HONEST_REFUSAL`: reply "Topping 🍍 not found", nothing changed |
-| `set_pizza_size {"size":"Large"}` | retry | rendered size label | PASS `IDEMPOTENT`: two calls leave the page in the requested size once |
+| Sports storefront `add_search_result_to_cart {"productId":"google-mls-pro-ball"}` | retry | site-persisted cart lines (`localStorage.kinetic_cart`), 0 → 2 | **FAIL `DUPLICATE_EFFECT`**: a retried add-to-cart after a lost reply doubles the line |
+| Smart Home `rearrangeDOMComponents {"componentIds":["nonexistent_widget"]}` | once | rendered dashboard cards, 1 → 0 | **FAIL `FALSE_SUCCESS`**: reply says "Dashboard successfully updated with requested components" while the dashboard shows nothing |
+| Smart Home `rearrangeDOMComponents` with two real ids | once | rendered dashboard cards, 1 → 2 | PASS `EFFECT_CONFIRMED` (positive control) |
+| zaMaker `add_topping {"topping":"🍍","count":1}` | retry | rendered `🍍` toppings, 0 → 2 | **FAIL `DUPLICATE_EFFECT`** |
+| zaMaker `remove_topping {"topping":"🍍"}` on an empty pizza | once | toppings, 0 → 0 | PASS `HONEST_REFUSAL`: reply "Topping 🍍 not found", nothing changed |
+| zaMaker `set_pizza_size {"size":"Large"}` | retry | rendered size label | PASS `IDEMPOTENT` |
 
 ```sh
 node bin/action-check.mjs run \
-  --url https://googlechromelabs.github.io/webmcp-tools/demos/pizza-maker/ \
-  --tool add_topping --input '{"topping":"🍍","count":1}' \
-  --observe examples/observe-pizza-toppings.mjs --mode retry
+  --url 'https://googlechromelabs.github.io/webmcp-tools/demos/smart-home/#/' \
+  --tool rearrangeDOMComponents --input '{"componentIds":["nonexistent_widget"]}' \
+  --observe examples/observe-smart-home-dashboard.mjs --mode once
 ```
 
 Verdict codes: `IDEMPOTENT`, `DUPLICATE_EFFECT`, `NO_EFFECT` (retry mode); `EFFECT_CONFIRMED`, `FALSE_SUCCESS`, `SILENT_EFFECT`, `HONEST_REFUSAL` (once mode). Known limit: declarative form tools that navigate on submit (for example the Le Petit Bistro demo) replace the document mid-call and are reported as a harness error rather than checked; supporting them is the next step. The refund fixture keeps its own path because it also injects the lost acknowledgement and runs a human approval, which the generic mode does not do.

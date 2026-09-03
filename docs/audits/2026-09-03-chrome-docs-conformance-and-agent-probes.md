@@ -199,6 +199,9 @@ The founder asked for the check to work on targets Action Check does not own. Ad
 | zaMaker `add_topping {🍍, count 1}` | retry | FAIL `DUPLICATE_EFFECT`, rendered toppings 0 → 2, exit 1 |
 | zaMaker `remove_topping {🍍}` on an empty pizza | once | PASS `HONEST_REFUSAL`, reply "Topping 🍍 not found", 0 → 0 |
 | zaMaker `set_pizza_size {Large}` | retry | PASS `IDEMPOTENT`, size label Large once |
+| Sports storefront `add_search_result_to_cart {google-mls-pro-ball}` | retry | FAIL `DUPLICATE_EFFECT`, `localStorage.kinetic_cart` 0 → 2 lines |
+| Smart Home `rearrangeDOMComponents {nonexistent_widget}` | once | FAIL `FALSE_SUCCESS`, reply "Dashboard successfully updated…", rendered cards 1 → 0 |
+| Smart Home `rearrangeDOMComponents {thermostat_control, camera_front_door}` | once | PASS `EFFECT_CONFIRMED`, cards 1 → 2 |
 | Le Petit Bistro `book_table_le_petit_bistro` (declarative) | retry | Not checked: the form submits and navigates, Playwright reports the target closed; now surfaced as a harness error naming the limit |
 
 String replies are classified with a bounded refusal heuristic ("not found", "invalid", "cannot", …); the raw reply is kept in the proof JSON.
