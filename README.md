@@ -1,112 +1,131 @@
 # Action Check
 
-**A browser test lab for consequential WebMCP actions.**
+**Tests what a WebMCP tool actually did, from outside the tool.**
 
-[Live demo](https://action-check-webmcp.vercel.app/) · [Devpost description](./devpost-submission.md) · MIT licensed
+[Live demo](https://action-check-webmcp.vercel.app/) · [Devpost description](./devpost-submission.md) · MIT
 
-Action Check demonstrates a problem that a valid tool schema cannot solve on its own: an action can return success while creating the wrong external effect. Its main demo registers an Action Check-owned `issue_refund` WebMCP fixture, makes an agent deliver the same synthetic refund twice, asks a person to approve the exact trial, and then checks a separately served staging ledger instead of trusting the tool response.
-
-The external refund staging target and browser adapter are deployed and verified from the stable public URL. They are synthetic infrastructure, not a payment-provider integration, and no real money moves. The Devpost project remains a draft until the public video and participant fields are complete.
+A site can expose a refund, a booking or a publish action to agents through WebMCP. The tool's reply is the only thing the agent sees, and a reply can say "done" when nothing happened, or when it happened twice. Action Check calls the tool the way an agent would, treats the reply as a claim, and only passes after reading the resulting state from somewhere the reply cannot forge.
 
 ![Action Check live WebMCP discovery](./docs/screenshots/action-check-live-discovery.jpg)
 
-## What it tests
+## What it catches
 
-A mutating browser tool can fail in ways that are invisible in its response:
+- A retry that repeats an effect which already committed.
+- A reply that claims success while the state did not change.
+- An action that runs after the approved values changed.
 
-- the approved state changed before execution;
-- a retry repeated an effect that already committed;
-- the tool claimed success before the intended state existed.
+## The demo: can one retry refund twice?
 
-Action Check treats the response as a claim. It passes a check only after reading the resulting state and comparing it with a plain verification rule.
+The page registers three WebMCP tools. An agent drives them; a person approves; Action Check reads a separate ledger.
 
-## Main WebMCP demo
-
-The judge path is a broken-versus-protected refund comparison:
-
-| Step | Who acts | What happens |
+| Step | Who | What happens |
 |---|---|---|
-| 1 | You + agent | You send the current instruction; the agent calls `stage_refund_comparison` to reset a fixed trial on the external staging target |
-| 2 | You | Review the payment, amount, currency, and request ID, then approve those exact values in the page |
-| 3 | Agent | Calls `issue_refund` twice for the broken lane and twice for the protected lane |
-| 4 | Agent + Action Check | The agent calls `prove_refund_comparison`; Action Check reads both staging lanes through the separate observation endpoint and renders the proof |
+| 1 | You + agent | You send the instruction. The agent calls `stage_refund_comparison`, which resets a fixed trial on the staging target |
+| 2 | You | Check the payment, amount, currency and request ID, then press **Approve exact staging refund**. The button is a page control; an agent cannot press it |
+| 3 | Agent | Calls `issue_refund` twice for the known-bad lane and twice for the protected lane, same request ID each time |
+| 4 | Agent + Action Check | The agent calls `prove_refund_comparison`. Action Check reads both lanes through the observation endpoint and shows the result |
 
-**Example prompt** (abridged; the page's **Copy agent instruction** button produces the full version with the exact approved values): "Call stage_refund_comparison with {}. Wait until I approve the exact trial shown on the page. Call issue_refund twice for lane \"broken\" using the approved payment, amount, currency and request ID; the first call is expected to return PROVIDER_ACK_LOST_AFTER_COMMIT, retry once with identical arguments. Do the same for lane \"protected\". Then call prove_refund_comparison with {}."
+**Example prompt** (abridged; the page's **Copy agent instruction** button gives the full text with the approved values): "Call stage_refund_comparison with {}. Wait until I approve the exact trial shown on the page. Call issue_refund twice for lane \"broken\" using the approved payment, amount, currency and request ID; the first call is expected to return PROVIDER_ACK_LOST_AFTER_COMMIT, retry once with identical arguments. Do the same for lane \"protected\". Then call prove_refund_comparison with {}."
 
-For each lane, the first refund commits and the harness deliberately drops the synthetic provider acknowledgement. The agent receives a bounded error and retries with the same request ID:
+In each lane the first call commits the refund and the harness drops the provider's acknowledgement on purpose. The agent gets a bounded error and retries with the same request ID.
 
-- **Broken target:** 2 calls → 2 provider effects
-- **Protected target:** 2 calls → 1 provider effect
+- **Known-bad target:** 2 calls, 2 refunds.
+- **Protected target:** 2 calls, 1 refund.
 
-Action Check's registered WebMCP tools and its outcome plane have different jobs. `/v1/invoke` returns only an action claim; `/v1/observe` reads the target's durable effect state and returns UUID effect IDs plus an evidence digest. Each trial starts with `/v1/reset` proving a zero-effect baseline and ends with `/v1/cleanup`. The target is a separately deployable synthetic Cloudflare Worker backed by per-run SQLite Durable Objects. It is authoritative for this fixture only: it is not another team's registered WebMCP tool, no payment account is connected, and no money moves.
+The staging target is a Cloudflare Worker with one SQLite Durable Object per lane and run. `/v1/invoke` returns a claim and nothing else. `/v1/observe` returns the durable state: effect IDs and an evidence digest. Every trial starts with `/v1/reset`, which has to prove a zero-effect baseline, and ends with `/v1/cleanup`. It is Action Check's own fixture: no payment account is connected and no money moves.
 
-In the native WebMCP path, the page has no button that stages, delivers, or proves this comparison. The agent must use the registered WebMCP tools; the only state-changing page control in that path is the human approval checkpoint. An always-visible **Agent tools** strip lists those exact tools and their truthful registration state. A phase-aware **Next** strip names who acts now, exposes a state-aware agent instruction only when needed, and explicitly tells the person to return to the agent after approval.
+In the native path the page has no button that stages, delivers or proves anything. Those steps only happen through the registered tools. The **Agent tools** strip shows the three names and their real registration state, and the **Next** strip says who acts now.
 
 ### Without a WebMCP browser
 
-A visitor without a WebMCP-capable browser previously reached a dead end here: a guide telling them to open Chrome 149+ (WebMCP flag) or ChatGPT's browser, with no way to see the proof. The hero now offers a **"Run with a simulated agent"** button — primary when native WebMCP is unavailable, offered as a secondary comparison option when it is available — that drives the same `RefundComparisonSession` the registered tools call, using the exact same handler functions (`session.agent.stageComparison`, `session.target.issueRefund`, `session.agent.proveComparison`), directly in-page instead of through `document.modelContext`. It runs the identical documented sequence — stage, human approval, two retried delivery attempts per lane, prove — against the same real external staging Worker, so the 2-vs-1 outcome is genuine, not mocked.
+Press **Run with a simulated agent**. It runs the same four steps in the page, calling the same session functions the registered tools call, against the same Worker, and it stops at the same approval button. The page labels it clearly: a persistent badge, a `simulated` tag on every trace row, and a note on the proof that WebMCP discovery was not used. Source: `src/adapters/simulated-agent/run-simulated-refund-comparison.ts`.
 
-The only step this simulated driver does not perform itself is human approval: it stages the trial, then waits for the real **Approve exact staging refund** click already wired into the page. Three honesty rails make the mode impossible to mistake for a native WebMCP run: a persistent badge ("Simulated agent · no WebMCP client connected · tools called in-page"), an event trace where every simulated step is explicitly tagged `simulated`, and a footer note on the proof panel stating that WebMCP discovery was not exercised. See `src/adapters/simulated-agent/run-simulated-refund-comparison.ts` and `src/app/RefundProofHero.tsx`.
+## The three tools
 
-## Default WebMCP tools
+| Tool | What it does |
+|---|---|
+| `stage_refund_comparison` | Resets both staging lanes, requires a zero-effect baseline, returns the values a person has to approve |
+| `issue_refund` | Runs one approved attempt on one lane, then reads that lane back through the observation path |
+| `prove_refund_comparison` | Takes fresh observations of both lanes, binds the proof to the effect IDs and digests, and renders known-bad against protected |
 
-The top-level page registers exactly these three tools by default:
+Inputs use strict schemas. Cancellation is forwarded. Registration is torn down with the page. Every error carries a code, a message and a `nextAction`, and the hints are state-aware, so an agent that calls a tool at the wrong moment is told what to do next. Calls fail closed when approval is missing, stale or does not match the input.
 
-| Tool | Purpose | Changes synthetic state |
-|---|---|---:|
-| `stage_refund_comparison` | Resets both external staging lanes, requires a zero-effect baseline, and returns the exact values that require review | Yes |
-| `issue_refund` | Invokes one approved attempt, then reads that lane through the separate observation path | Yes |
-| `prove_refund_comparison` | Performs fresh observations, binds the proof to exact effect IDs and evidence digests, and renders the expected known-bad failure beside the protected pass | Yes |
+A fourth tool, `run_external_target_canary`, registers only after a same-origin readiness check passes. It is absent by default.
 
-Inputs use strict schemas, cancellation is forwarded, registration is cleaned up with the page lifecycle, and calls fail closed when approval is missing, stale, or inconsistent with the input.
+## Four more cases in the page
 
-When a same-origin readiness check verifies the exact isolated staging identity, the page may additionally register `run_external_target_canary`. That optional tool is absent by default and exposes no account, provider, content, environment, credential, or URL selection.
+The lower section runs the same pattern on four synthetic tools, driven by page buttons rather than registered tools.
 
-## Supporting synthetic cases
-
-The lower test suite shows that the verification pattern applies beyond refunds:
-
-| Case | Synthetic action | Injected problem | Passing result |
+| Case | Tool | Injected fault | Pass condition |
 |---|---|---|---|
-| **Booking changed after approval** | `confirm_booking` | The quote changes after approval | No booking is created |
-| **Refund retried twice** | `issue_refund` | The first provider acknowledgement is dropped after commit | Two calls create one refund |
-| **Deploy said done, state unchanged** | `deploy_service` | The tool returns success while the service stays unhealthy | The false success is rejected |
-| **Post said live, stayed draft** | `publish_post` | The tool returns success while the post remains a draft | The false success is rejected |
+| Booking changed after approval | `confirm_booking` | The quote changes after approval | No booking is created |
+| Refund retried twice | `issue_refund` | The acknowledgement is dropped after commit | Two calls create one refund |
+| Deploy said done, state unchanged | `deploy_service` | Success is reported while the service stays unhealthy | The false success is rejected |
+| Post said live, stayed draft | `publish_post` | Success is reported while the post stays a draft | The false success is rejected |
 
-These four fixtures are deterministic UI-run examples; they are not four additional registered WebMCP targets. **Run 4 UI examples** checks the set. **Prove this test catches the bug** deliberately removes the relevant protection, and **Run safe version** restores it.
+**Prove this test catches the bug** removes the protection and shows the check failing. **Run safe version** puts it back.
 
-The refund fixture is the first target, not the product boundary.
+## Run the check from outside
 
-## Why this fits WebMCP
+`bin/action-check.mjs` launches your installed Chrome 149+ with `--enable-features=WebMCP` (the Playwright-bundled Chromium has no native WebMCP), discovers the page's tools, and cross-checks a tool's claims against an `observe()` module you supply. Proof JSON goes to stdout, PASS or FAIL to the exit code.
 
-WebMCP lets a site expose typed actions that an agent can discover and invoke in the browser. Action Check uses that boundary for the target action itself, keeps approval outside the registered tool surface, shares the resulting state with the interface, and checks effect state separately from the target response.
+Against the built-in fixture it performs the approval click itself and calls `issue_refund` twice per lane:
 
-**How it differs from a reference implementation of a safe action.** Some entries build the guarantee into their own tool: a one-time approval consumed atomically before the provider call, plus a signed receipt (Witnessed Refund is a well-made example). Action Check is the test that tells you whether *your* tool has that property. It does not need the tool's internals instrumented: it drives the action from outside, reads the resulting state from a ledger the tool does not control, and reports the gap between what the tool claimed and what happened. The same harness runs against a broken target and a protected one in one trial, which is why it can show two effects versus one. Proof from outside is the product; the refund fixture is only the first target.
+```sh
+node bin/action-check.mjs run \
+  --url https://action-check-webmcp.vercel.app \
+  --tool issue_refund --observe examples/observe-refund-staging.mjs \
+  --target-base-url https://action-check-refund-staging-target-production.ancient-dust-0cb4.workers.dev
+```
 
-The refund fixture is Action Check-owned. The same check also runs against tools Action Check does not own: the CLI's external-target mode (below) drives any page's registered WebMCP tool and takes its verdict from a caller-supplied read of that page's own state. It was run on 3 September against Google's public WebMCP zaMaker demo in real Chrome 152.
+Your `observe()` has to read a store the tool never writes into its own reply. If it just repeats the reply, the check fails; that negative control is unit-tested.
 
-It does not claim that WebMCP automatically provides authorization, idempotency, durable execution, or truthful postconditions. Those are application responsibilities; Action Check makes them visible and testable.
+### Any page's tool (external-target mode)
+
+Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema through `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict from the two observations alone. `observe(ctx)` gets the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API. It never sees the tool's reply.
+
+Runs recorded on 3 September against three of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos) in Chrome 152. Action Check does not own those pages. The proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`.
+
+| Demo and tool | Mode | What `observe()` read | Verdict |
+|---|---|---|---|
+| Sports storefront `add_search_result_to_cart {"productId":"google-mls-pro-ball"}` | retry | the site's own cart in `localStorage.kinetic_cart`, 0 to 2 lines | **FAIL `DUPLICATE_EFFECT`**. A retried add-to-cart doubles the line |
+| Smart Home `rearrangeDOMComponents {"componentIds":["nonexistent_widget"]}` | once | rendered dashboard cards, 1 to 0 | **FAIL `FALSE_SUCCESS`**. The reply says "Dashboard successfully updated with requested components"; the dashboard shows nothing |
+| Smart Home `rearrangeDOMComponents` with two real ids | once | rendered dashboard cards, 1 to 2 | PASS `EFFECT_CONFIRMED` (positive control) |
+| zaMaker `add_topping {"topping":"🍍","count":1}` | retry | rendered 🍍 toppings, 0 to 2 | **FAIL `DUPLICATE_EFFECT`** |
+| zaMaker `remove_topping {"topping":"🍍"}` on an empty pizza | once | toppings, 0 to 0 | PASS `HONEST_REFUSAL`. The reply says "Topping 🍍 not found" and nothing changed |
+| zaMaker `set_pizza_size {"size":"Large"}` | retry | the rendered size label | PASS `IDEMPOTENT` |
+
+```sh
+node bin/action-check.mjs run \
+  --url 'https://googlechromelabs.github.io/webmcp-tools/demos/smart-home/#/' \
+  --tool rearrangeDOMComponents --input '{"componentIds":["nonexistent_widget"]}' \
+  --observe examples/observe-smart-home-dashboard.mjs --mode once
+```
+
+Verdict codes: `IDEMPOTENT`, `DUPLICATE_EFFECT`, `NO_EFFECT` in retry mode; `EFFECT_CONFIRMED`, `FALSE_SUCCESS`, `SILENT_EFFECT`, `HONEST_REFUSAL` in once mode. Known limit: a declarative form tool that navigates on submit (the Le Petit Bistro demo, for example) replaces the document mid-call. The CLI reports that as a harness error instead of a verdict. Supporting it is the next piece of work. The refund fixture keeps its own path because it also injects the lost acknowledgement and waits for a human approval, which the generic mode does not do.
+
+## Why WebMCP
+
+WebMCP is the surface under test. The CLI and the page call tools through `document.modelContext.executeTool`, which is the call an agent makes. Without WebMCP you script clicks and test a UI, not the tool. Chrome's own WebMCP evals guidance asks developers to verify the side effect and to test mid-chain failure; that is what these checks do.
+
+Some entries build the guarantee into their own tool, for example a one-time approval consumed before the provider call plus a signed receipt (Witnessed Refund is a good one). Action Check is the test that tells you whether your tool has that property. It drives the action from outside, reads the resulting state from a source the tool does not control, and reports the gap.
+
+WebMCP itself does not give you authorization, idempotency, durable execution or truthful postconditions. Those belong to the application. Action Check makes them visible and testable.
 
 ## Architecture
 
-- `src/refund-comparison` owns the fixed trial, exact approval binding, two provider lanes, and proof.
-- `src/adapters/webmcp/register-refund-comparison-tools.ts` registers the three default browser tools.
-- `src/integrations/external-effect-staging` implements the strict browser-side `reset`, `invoke`, `observe`, and `cleanup` adapter.
-- `workers/refund-staging-target` is the separately deployable synthetic outcome service. It isolates each lane in a leased SQLite Durable Object, enforces exactly two invocations per run, and rate-limits reset allocation; its invoke response cannot supply proof.
-- `src/app/RefundProofHero.tsx` renders native status, the human checkpoint, lane state, and the final comparison.
-- `src/workbench/fixtures` and `src/workbench/scenarios` implement the four supporting synthetic cases.
-- `src/integrations/external-target-staging` defines the blocked-by-default staging canary contract.
-- `server/external-target-staging` contains the same-origin broker that would keep a staging credential out of the browser.
-
-## Connecting a real site (optional staging canary)
-
-The staging adapter is implemented on the Action Check side and fails closed. The required endpoints on an external target, an isolated database, production-lifecycle worker wiring, and an independent canary sink are not deployed or configured in this repository. The UI therefore labels it **Optional external-target staging · disabled** by default, exposes no run control, and claims no live result from a connected site.
-
-See the [staging canary contract and go-live gate](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md).
+- `src/refund-comparison`: the fixed trial, approval binding, two lanes, proof.
+- `src/adapters/webmcp/register-refund-comparison-tools.ts`: the three registered tools.
+- `src/integrations/external-effect-staging`: the browser-side `reset`, `invoke`, `observe`, `cleanup` adapter.
+- `workers/refund-staging-target`: the staging Worker. One leased SQLite Durable Object per lane, exactly two invocations per run, rate-limited resets. Its invoke reply cannot supply proof.
+- `src/app/RefundProofHero.tsx`: native status, the approval checkpoint, lane state, the result.
+- `src/workbench/fixtures` and `src/workbench/scenarios`: the four supporting cases.
+- `bin/action-check.mjs`, `bin/lib/run-generic.mjs`, `bin/lib/generic-verdict.mjs`: the CLI and its verdicts.
+- `src/integrations/external-target-staging` and `server/external-target-staging`: an optional staging canary for a connected site, disabled by default. See [the canary contract](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md).
 
 ## Run locally
 
-Requires Node.js 22.x.
+Node.js 22.x.
 
 ```sh
 npm ci
@@ -120,37 +139,7 @@ In a second terminal:
 npm run dev
 ```
 
-Open the URL printed by Vite. On loopback, the browser adapter uses `http://127.0.0.1:8787` by default. The supporting suite remains usable when `document.modelContext` is unavailable; the main agent path reports that native WebMCP is unavailable.
-
-For a production frontend build, set `VITE_REFUND_STAGING_TARGET_URL` to the exact deployed HTTPS Worker origin and configure the Worker to allow the frontend's exact origin. `wrangler.jsonc` contains separate local and production environments; use `npm run deploy:dry-run:production` before `npm run deploy:production` in the Worker package.
-
-## Run the check from outside (CLI v0)
-
-`node bin/action-check.mjs run --url <page> --tool issue_refund --observe <module.mjs>` drives real Chrome 149+ (launched with `--enable-features=WebMCP`; the bundled Playwright Chromium does not implement native WebMCP), performs the human approval click itself, invokes `issue_refund` twice per lane with one request ID, and cross-checks the tool's own claims against an independently observed effect count. Your `observe()` module must read a store the tool never writes back into its own response, or the check proves nothing. The built-in fixture is the refund comparison (see `examples/observe-refund-staging.mjs`). Proof JSON goes to stdout, PASS/FAIL to the exit code.
-
-### Point it at any page's tool (external-target mode, v0.1)
-
-Add `--input '<json>'` and the CLI targets any registered WebMCP tool on any page. It reads the tool's description and schema from `document.modelContext.getTools()`, calls `observe()` before and after, invokes the tool once (`--mode once`) or twice with identical input (`--mode retry`, the default), and takes the verdict only from the two observations. `observe(ctx)` receives the live Playwright `page`, so it can count DOM elements, call a read-only tool, or query the site's API; it is never shown the tool's reply.
-
-Runs recorded on 3 September against three of Google's public [WebMCP demos](https://github.com/GoogleChromeLabs/webmcp-tools/tree/main/demos), pages Action Check does not own, in Chrome 152. Proof JSON for each run is in `docs/evidence/external-targets-2026-09-03/`.
-
-| Demo and tool | Mode | Observation (`examples/`) | Verdict |
-|---|---|---|---|
-| Sports storefront `add_search_result_to_cart {"productId":"google-mls-pro-ball"}` | retry | site-persisted cart lines (`localStorage.kinetic_cart`), 0 → 2 | **FAIL `DUPLICATE_EFFECT`**: a retried add-to-cart after a lost reply doubles the line |
-| Smart Home `rearrangeDOMComponents {"componentIds":["nonexistent_widget"]}` | once | rendered dashboard cards, 1 → 0 | **FAIL `FALSE_SUCCESS`**: reply says "Dashboard successfully updated with requested components" while the dashboard shows nothing |
-| Smart Home `rearrangeDOMComponents` with two real ids | once | rendered dashboard cards, 1 → 2 | PASS `EFFECT_CONFIRMED` (positive control) |
-| zaMaker `add_topping {"topping":"🍍","count":1}` | retry | rendered `🍍` toppings, 0 → 2 | **FAIL `DUPLICATE_EFFECT`** |
-| zaMaker `remove_topping {"topping":"🍍"}` on an empty pizza | once | toppings, 0 → 0 | PASS `HONEST_REFUSAL`: reply "Topping 🍍 not found", nothing changed |
-| zaMaker `set_pizza_size {"size":"Large"}` | retry | rendered size label | PASS `IDEMPOTENT` |
-
-```sh
-node bin/action-check.mjs run \
-  --url 'https://googlechromelabs.github.io/webmcp-tools/demos/smart-home/#/' \
-  --tool rearrangeDOMComponents --input '{"componentIds":["nonexistent_widget"]}' \
-  --observe examples/observe-smart-home-dashboard.mjs --mode once
-```
-
-Verdict codes: `IDEMPOTENT`, `DUPLICATE_EFFECT`, `NO_EFFECT` (retry mode); `EFFECT_CONFIRMED`, `FALSE_SUCCESS`, `SILENT_EFFECT`, `HONEST_REFUSAL` (once mode). Known limit: declarative form tools that navigate on submit (for example the Le Petit Bistro demo) replace the document mid-call and are reported as a harness error rather than checked; supporting them is the next step. The refund fixture keeps its own path because it also injects the lost acknowledgement and runs a human approval, which the generic mode does not do.
+Open the URL Vite prints. On loopback the page talks to the Worker at `http://127.0.0.1:8787`. For a production build set `VITE_REFUND_STAGING_TARGET_URL` to the deployed Worker origin and allow the frontend origin in the Worker. `wrangler.jsonc` has separate local and production environments; run `npm run deploy:dry-run:production` before `npm run deploy:production` in the Worker package.
 
 ## Verify
 
@@ -161,20 +150,19 @@ npm run test:e2e
 npm run test:native-webmcp
 ```
 
-Release results are recorded in [docs/QA_EVIDENCE.md](./docs/QA_EVIDENCE.md). On the 3 September build the stable production URL passed 20/20 desktop/mobile browser journeys, 1/1 installed-Chrome 152 native WebMCP journey, the headless CLI check (2 effects versus 1), and 36 off-script agent-recovery probes with zero console errors. The ChatGPT in-app-browser journey passed on the 1 September build. Unit fakes do not replace that live evidence.
+Results are in [docs/QA_EVIDENCE.md](./docs/QA_EVIDENCE.md). On the 3 September build the live URL passed 20 of 20 desktop and mobile browser journeys, the native Chrome 152 WebMCP journey, the CLI check (2 effects against 1), and 36 off-script agent-recovery probes, with no console errors. The ChatGPT in-app browser journey passed on the 1 September build.
 
-## Truth and safety boundary
+## What this is and is not
 
-- Every payment, booking, service, post, identity, request, effect, and result in the demo is fictional or generated for the synthetic staging sandbox.
-- The refund hero proves one synthetic idempotency comparison, not a universal exactly-once guarantee.
-- The staging ledger is separate from the browser session and durable for the trial, but it is not a payment-provider record or independently operated production system.
-- `issue_refund` is Action Check's own WebMCP fixture backed by that Worker, not an independently registered tool from another team.
-- The four supporting cases are product hypotheses, not customer incidents or measured production demand.
-- The configured hero contacts only the synthetic refund staging target. It never calls a payment processor, a connected external-target site, or another production system.
-- The external target is a publicly reachable synthetic staging service with bounded 15-minute leases. It is not authenticated product infrastructure and must not be used for real data.
-- A successful check means the declared synthetic rule was evaluated correctly; it does not mean a real business action succeeded.
+- Every payment, booking, service, post, identity, request and effect is fictional or generated for the staging sandbox.
+- The refund demo proves one synthetic idempotency comparison, not a general exactly-once guarantee.
+- The staging ledger is separate from the browser session and durable for the trial. It is Action Check's own Worker, not a payment provider's record. The independence is architectural: a separate endpoint the tool cannot write into.
+- A verdict is only as strong as the `observe()` read behind it: a provider API, the site's own records, or what the page shows a person afterwards.
+- The four supporting cases are product hypotheses, not customer incidents.
+- The staging target is public, with 15-minute leases. Do not put real data in it.
+- A pass means the declared rule held for that trial. It does not mean a real business action succeeded.
 
-See [PUBLIC_PRIVATE_BOUNDARY.md](./PUBLIC_PRIVATE_BOUNDARY.md), [SECURITY.md](./SECURITY.md), and [verification evidence](./docs/QA_EVIDENCE.md).
+See [PUBLIC_PRIVATE_BOUNDARY.md](./PUBLIC_PRIVATE_BOUNDARY.md) and [SECURITY.md](./SECURITY.md).
 
 ## Project documents
 
@@ -185,7 +173,7 @@ See [PUBLIC_PRIVATE_BOUNDARY.md](./PUBLIC_PRIVATE_BOUNDARY.md), [SECURITY.md](./
 - [External Target staging canary contract](./docs/integrations/EXTERNAL_TARGET_STAGING_CANARY.md)
 - [Boundary-check usage](./docs/PUBLIC_BOUNDARY_CHECK.md)
 - [Third-party notices](./THIRD_PARTY_NOTICES.md)
-- [Current hackathon-audit reconciliation](./docs/audits/2026-08-31-hackathon-audit-reconciliation.md)
+- [Chrome docs conformance and agent probes](./docs/audits/2026-09-03-chrome-docs-conformance-and-agent-probes.md)
 
 ## Licence
 
